@@ -1,0 +1,231 @@
+
+#+Title: Srimacs
+#+Author: srirampc 
+
+* Emacs Customization by srirampc
+  +Shamelessy Copied+ Remixed from [[https://github.com/steckerhalter/][steckerhalter]],
+  eschulte's [[https://github.com/eschulte/emacs24-starter-kit][starter kit]] and many others.
+
+* Basics
+** Package Archives
+
+#+BEGIN_SRC emacs-lisp
+(setq package-archives nil)
+#+END_SRC
+
+Remove the default GNU archives, because we use steckerhalter's =quelpa=.
+
+** Quelpa
+
+#+BEGIN_QUOTE
+Build and install your Emacs Lisp packages on-the-fly directly from source
+#+END_QUOTE
+
+Github: [[https://github.com/quelpa/quelpa][quelpa]]
+
+#+BEGIN_SRC emacs-lisp
+(if (require 'quelpa nil t)
+    (quelpa '(quelpa :repo "quelpa/quelpa" :fetcher github) :upgrade t)
+  (with-temp-buffer
+    (url-insert-file-contents "https://raw.github.com/quelpa/quelpa/master/bootstrap.el")
+    (eval-buffer)))
+#+END_SRC
+
+** Utility Function
+#+BEGIN_SRC emacs-lisp
+(defun eval-and-replace ()
+  "Replace the preceding sexp with its value."
+  (interactive)
+  (backward-kill-sexp)
+  (condition-case nil
+      (prin1 (eval (read (current-kill 0)))
+             (current-buffer))
+    (error (message "Invalid expression")
+           (insert (current-kill 0)))))
+#+END_SRC
+
+Useful when you want to evaluate an expression quickly.
+
+* General Customization
+** Key Bindigs
+
+#+NAME: gen-keys
+#+BEGIN_SRC emacs-lisp :var keys=keys :results output :tangle no :exports none :colnames nil
+(mapcar (lambda (l)
+          (let* ((key (car l))
+                 (def (if (string-match "^[[:alnum:]]\\{2\\}$" (format "%s" key))
+                          (format "key-chord-define-global \"%s\"" key)
+                        (format "global-set-key (kbd \"%s\")" key)))
+                 (command (car (last l))))
+                 (princ (format "(%s %s)\n" def command))))
+          keys)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :noweb yes :results silent
+<<gen-keys()>>
+#+END_SRC
+
+The code for the keys is generated from data in an Org table named =keys= using
+a bit of Elisp code =gen-keys= and is spit out inside a code block via
+[[http://orgmode.org/manual/noweb.html][Noweb syntax]].
+
+**** Key definition table                                          :noexport:
+#+TBLNAME: keys
+| Combo       | Category  | Desciption                                 | Command                                               |
+|-------------+-----------+--------------------------------------------+-------------------------------------------------------|
+| C-x C-k     | General   | Kill emacs                                 | 'kill-region                                          |
+| C-c C-k     | General   | Kill emacs                                 | 'kill-region                                          |
+| C-x C-g     | General   | Go to line                                 | 'goto-line                                            |
+| C-c C-g     | General   | Go to line                                 | 'goto-line                                            |
+| C-w         | General   | Kill the last word                         | 'backward-kill-word                                   |
+| <f6>        | Buffers   | Kill current buffer                        | (lambda () (interactive) (kill-buffer (buffer-name))) |
+| C-h C-d     | Directory | Open dired in current file location        | 'dired-jump                                           |
+| C-c s b     | Directory | Open the speedbar                          | 'speedbar                                             |
+| C-c T       | Directory | Open terminal in current directory         | (lambda () (interactive) (my-open-terminal nil))      |
+| C-c t       | Directory | Open terminal in current project root      | (lambda () (interactive) (my-open-terminal t))        |
+| C-S-c C-S-c | Editing   | Edit region with multiple cursors          | 'mc/edit-lines                                        |
+| C-<         | Editing   | Multiple cursors up                        | 'mc/mark-previous-like-this                           |
+| C->         | Editing   | Multiple cursors down                      | 'mc/mark-next-like-this                               |
+| C-*         | Editing   | Mark all like "this" with multiple cursors | 'mc/mark-all-like-this                                |
+| C-c l n     | Interface | Show/hide the line numbers                 | 'linum-mode                                           |
+
+** Settings
+*** Always Maximize
+
+#+BEGIN_SRC emacs-lisp
+(modify-all-frames-parameters '((fullscreen . maximized)))
+#+END_SRC
+
+Maximize and full frame all emacs
+
+*** General Settings
+
+#+BEGIN_SRC emacs-lisp
+(setq
+ inhibit-startup-message t
+ backup-directory-alist `((".*" . ,temporary-file-directory)) ;don't clutter my fs and put backups into tmp
+ column-number-mode t                   ;show the column number
+ default-major-mode 'text-mode          ;use text mode per default
+ mouse-yank-at-point t                  ;middle click with the mouse yanks at point
+ history-length 250                     ;default is 30
+ locale-coding-system 'utf-8            ;utf-8 is default
+ tab-always-indent 'complete            ;try to complete before identing
+ confirm-nonexistent-file-or-buffer nil ;don't ask to create a buffer
+ recentf-max-saved-items 5000           ;same up to 5000 recent files
+ eval-expression-print-length nil       ;do not truncate printed expressions
+ eval-expression-print-level nil        ;print nested expressions
+ kill-ring-max 5000                     ;truncate kill ring after 5000 entries
+ mark-ring-max 5000                     ;truncate mark ring after 5000 entries
+ mouse-autoselect-window -.1            ;window focus follows the mouse pointer
+ show-paren-delay 0
+ )
+#+END_SRC
+
+*** Prompt Behavior
+
+#+BEGIN_SRC emacs-lisp
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+(setq kill-buffer-query-functions
+  (remq 'process-kill-buffer-query-function
+         kill-buffer-query-functions))
+#+END_SRC
+
+All "yes" or "no" questions are aliased to "y" or "n". We don't really want to type a full word to answer a question from Emacs, yet Emacs imposes that silly behavior on us. No!
+
+Also Emacs should be able to kill processes without asking which is achieved in the second expression. Got that snippet from: http://www.masteringemacs.org/articles/2010/11/14/disabling-prompts-emacs/
+
+
+*** Default Settings
+
+#+BEGIN_SRC emacs-lisp
+(setq-default
+ tab-width 4
+ indent-tabs-mode nil                   ;use spaces instead of tabs
+ c-basic-offset 4                       ;"tab" with in c-related modes
+ c-hungry-delete-key t                  ;delete more than one space
+ )
+#+END_SRC
+
+Some variables like =tab-width= cannot be set globally:
+
+#+BEGIN_QUOTE
+tab-width is a variable defined in `C source code'.
+...
+Automatically becomes buffer-local when set.
+#+END_QUOTE
+
+Whenever they are set the value becomes buffer-local. To be able to set such a variable globally we have to use =setq-default= which modifies the default value of the variable.
+
+*** Global Modes
+
+#+BEGIN_SRC emacs-lisp
+(global-auto-revert-mode 1)  ;auto revert buffers when changed on disk
+(show-paren-mode t)          ;visualize()
+(iswitchb-mode t)            ;use advanced tab switching
+(blink-cursor-mode -1)       ;no cursor blinking
+(tool-bar-mode -1)           ;disable the awful toolbar
+(menu-bar-mode -1)           ;no menu, you can toggle it with C-c m
+(scroll-bar-mode -1)         ;disable the sroll bar
+#+END_SRC
+
+These are built-in global modes/settings.
+
+
+** Theme, Faces, Frame
+
+*** Theme
+#+BEGIN_SRC emacs-lisp
+(quelpa '(grandshell-theme :repo "steckerhalter/grandshell-theme" :fetcher github))
+(quelpa 'solarized-theme)
+;; (load-theme 'grandshell t)
+(load-theme 'solarized-dark)
+#+END_SRC
+
+Loading my very own [[https://github.com/steckerhalter/grandshell-theme][Grand Shell Theme]] here. It can be installed via [[http://melpa.milkbox.net/#grandshell-theme][MELPA]] too. It looks like this:
+
+#+CAPTION: Grand Shell Theme
+#+NAME: grand-shell-theme
+[[https://raw.github.com/steckerhalter/grandshell-theme/master/grandshell-theme.png]]
+
+
+*** Face
+#+BEGIN_SRC emacs-lisp
+(if (equalp (symbol-name system-type) "gnu/linux")
+     (set-default-font "Inconsolata-12")
+   (if (equalp (symbol-name system-type) "windows-nt")
+       (set-default-font "Inconsolata-12")
+     (set-default-font "Monaco-12")))
+#+END_SRC
+
+Inconsolata is my favorite font!
+
+*** Frame title
+
+#+BEGIN_SRC emacs-lisp
+(setq frame-title-format
+      '(buffer-file-name
+        "%f"
+        (dired-directory dired-directory "%b")))
+#+END_SRC
+
+Set the full path on the frame.
+
+
+** Custom Functions
+*** my-indent-whole-buffer
+
+#+BEGIN_SRC emacs-lisp
+(defun my-indent-whole-buffer ()
+  (interactive)
+  (indent-region (point-min) (point-max)))
+#+END_SRC
+
+Indent the whole buffer with one command. Bound to =C-h TAB=.
+
+* Power Tools
+
+* Writing
+
+
+* Programming 
