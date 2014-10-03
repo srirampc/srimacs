@@ -191,9 +191,9 @@ Loading my very own [[https://github.com/steckerhalter/grandshell-theme][Grand S
 
 *** Face
 #+BEGIN_SRC emacs-lisp
-(if (equalp (symbol-name system-type) "gnu/linux")
+(if (equal (symbol-name system-type) "gnu/linux")
      (set-default-font "Inconsolata-12")
-   (if (equalp (symbol-name system-type) "windows-nt")
+   (if (equal (symbol-name system-type) "windows-nt")
        (set-default-font "Inconsolata-12")
      (set-default-font "Monaco-12")))
 #+END_SRC
