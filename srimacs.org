@@ -23,6 +23,7 @@ Build and install your Emacs Lisp packages on-the-fly directly from source
 Github: [[https://github.com/quelpa/quelpa][quelpa]]
 
 #+BEGIN_SRC emacs-lisp
+(setq quelpa-update-melpa-p nil)
 (if (require 'quelpa nil t)
     (quelpa '(quelpa :repo "quelpa/quelpa" :fetcher github) :upgrade t)
   (with-temp-buffer
