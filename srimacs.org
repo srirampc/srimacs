@@ -25,7 +25,7 @@ Github: [[https://github.com/quelpa/quelpa][quelpa]]
 #+BEGIN_SRC emacs-lisp
 (setq quelpa-update-melpa-p nil)
 (if (require 'quelpa nil t)
-    (quelpa '(quelpa :repo "quelpa/quelpa" :fetcher github) :upgrade t)
+    (quelpa '(quelpa :repo "quelpa/quelpa" :fetcher github) :upgrade nil)
   (with-temp-buffer
     (url-insert-file-contents "https://raw.githubusercontent.com/srirampc/srimacs/master/bootstrap.el")
     (eval-buffer)))
