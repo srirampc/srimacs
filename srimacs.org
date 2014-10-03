@@ -1,11 +1,25 @@
-#+Title: Srimacs
-#+Author: srirampc 
+#+Title: Emacs Customization
+#+Author: srirampc
+#+LATEX_EXPORT_ON_SAVE: nil
 
-* Emacs Customization by srirampc
-  +Shamelessy Copied+ Remixed from [[https://github.com/steckerhalter/][steckerhalter]],
-  eschulte's [[https://github.com/eschulte/emacs24-starter-kit][starter kit]] and many others.
++Shamelessy Copied+ Remixed from [[https://github.com/steckerhalter/][steckerhalter]],
+eschulte's [[https://github.com/eschulte/emacs24-starter-kit][starter kit]] and many others.
 
 * Basics
+** Install Packages outside of MELPA
+This is a workaround. Need to handle this appropriately.
+*** auctex 
+#+BEGIN_SRC emacs-lisp
+(if (not (package-installed-p 'auctex))
+    (package-install 'auctex))
+#+END_SRC
+
+*** queue
+#+BEGIN_SRC emacs-lisp
+(if (not (package-installed-p 'queue))
+    (package-install 'queue))
+#+END_SRC
+
 ** Package Archives
 
 #+BEGIN_SRC emacs-lisp
@@ -78,16 +92,26 @@ a bit of Elisp code =gen-keys= and is spit out inside a code block via
 | C-x C-g     | General   | Go to line                                 | 'goto-line                                            |
 | C-c C-g     | General   | Go to line                                 | 'goto-line                                            |
 | C-w         | General   | Kill the last word                         | 'backward-kill-word                                   |
+| C-c n       | General   | Show file name + path, save to clipboard   | 'my-show-file-name                                    |
 | <f6>        | Buffers   | Kill current buffer                        | (lambda () (interactive) (kill-buffer (buffer-name))) |
+| <f8>        | Buffers   | Switch to "other" buffer                   | (lambda () (interactive) (switch-to-buffer nil))      |
 | C-h C-d     | Directory | Open dired in current file location        | 'dired-jump                                           |
 | C-c s b     | Directory | Open the speedbar                          | 'speedbar                                             |
 | C-c T       | Directory | Open terminal in current directory         | (lambda () (interactive) (my-open-terminal nil))      |
 | C-c t       | Directory | Open terminal in current project root      | (lambda () (interactive) (my-open-terminal t))        |
+| C-h C-d     | Directory | Open dired in current file location        | 'dired-jump                                           |
 | C-S-c C-S-c | Editing   | Edit region with multiple cursors          | 'mc/edit-lines                                        |
 | C-<         | Editing   | Multiple cursors up                        | 'mc/mark-previous-like-this                           |
 | C->         | Editing   | Multiple cursors down                      | 'mc/mark-next-like-this                               |
 | C-*         | Editing   | Mark all like "this" with multiple cursors | 'mc/mark-all-like-this                                |
+| C-h TAB     | Editing   | Indent the whole buffer                    | 'my-indent-whole-buffer                               |
+| M-9         | Windows   | Switch to the minibuffer                   | 'my-switch-to-minibuffer-window                       |
+| <M-up>      | Windows   | Move the current buffer window up          | 'buf-move-up                                          |
+| <M-down>    | Windows   | Move the current buffer window down        | 'buf-move-down                                        |
+| <M-left>    | Windows   | Move the current buffer window left        | 'buf-move-left                                        |
+| <M-right>   | Windows   | Move the current buffer window right       | 'buf-move-right                                       |
 | C-c l n     | Interface | Show/hide the line numbers                 | 'linum-mode                                           |
+
 
 ** Settings
 *** Always Maximize
@@ -134,7 +158,6 @@ Maximize and full frame all emacs
 All "yes" or "no" questions are aliased to "y" or "n". We don't really want to type a full word to answer a question from Emacs, yet Emacs imposes that silly behavior on us. No!
 
 Also Emacs should be able to kill processes without asking which is achieved in the second expression. Got that snippet from: http://www.masteringemacs.org/articles/2010/11/14/disabling-prompts-emacs/
-
 
 *** Default Settings
 
@@ -223,9 +246,1005 @@ Set the full path on the frame.
 
 Indent the whole buffer with one command. Bound to =C-h TAB=.
 
+*** my-show-file-name
+
+#+BEGIN_SRC emacs-lisp
+(defun my-show-file-name ()
+  "Show the full path file name in the minibuffer."
+  (interactive)
+  (message (buffer-file-name))
+  (kill-new (file-truename buffer-file-name)))
+#+END_SRC
+
+Display and copy the full path of the file associated with the current buffer to the kill ring.
+
+*** my-show-help
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(pos-tip
+          :repo "syohex/pos-tip"
+          :fetcher github
+          :files ("pos-tip.el")))
+(require 'pos-tip)
+(defun my-show-help ()
+  "Show docs for symbol at point or at beginning of list if not on a symbol.
+Pass symbol-name to the function DOC-FUNCTION."
+  (interactive)
+  (let* ((symbol (save-excursion
+                   (or (symbol-at-point)
+                       (progn (backward-up-list)
+                              (forward-char)
+                              (symbol-at-point)))))
+         (doc-string (if (fboundp symbol)
+                         (documentation symbol t)
+                       (documentation-property
+                        symbol 'variable-documentation t))))
+    (if doc-string
+        (pos-tip-show doc-string 'popup-tip-face (point) nil -1 60)
+      (message "No documentation for %s" symbol))))
+(define-key lisp-mode-shared-map (kbd "C-c C-d")
+  (lambda ()
+    (interactive)
+    (my-show-help)))
+#+END_SRC
+
+Get documentation popup without having to trigger auto-complete. It's mostly 
+stolen from [[http://jaderholm.com/][Scott Jaderholm]] (the code is on [[http://www.emacswiki.org/emacs/AutoComplete][Emacswiki]]), but has been made more
+general to also work with other completion functions. 
+
 * Power Tools
+*** buffer-move
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(buffer-move :fetcher wiki))
+#+END_SRC
+
+*** company
+#+BEGIN_QUOTE
+Company stands for "complete anything". It uses pluggable back-ends
+and front-ends to retrieve and display completion candidates.
+
+It comes with several back-ends such as Elisp, Clang, Semantic, Eclim,
+Ropemacs, Ispell, dabbrev, etags, gtags, files, keywords and a few
+others.
+#+END_QUOTE
+
+#+CAPTION: company
+#+NAME: fig:co
+http://company-mode.github.io/images/company-semantic.png
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(company :repo "company-mode/company-mode" :fetcher github))
+(require 'company)
+(setq company-idle-delay 0.3)
+(setq company-tooltip-limit 20)
+(setq company-minimum-prefix-length 2)
+(setq company-echo-delay 0)
+(setq company-auto-complete nil)
+(global-company-mode 1)
+(add-to-list 'company-backends 'company-dabbrev t)
+(add-to-list 'company-backends 'company-ispell t)
+(add-to-list 'company-backends 'company-files t)
+(setq company-backends (remove 'company-ropemacs company-backends))
+#+END_SRC
+
+Similar to auto-complete mode.
+
+#+BEGIN_SRC emacs-lisp
+(defun my-pcomplete-capf ()
+  (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
+(add-hook 'org-mode-hook #'my-pcomplete-capf)
+#+END_SRC
+
+This enables company completion for org-mode built-in commands and
+tags.
+
+*** dedicated
+
+#+BEGIN_QUOTE
+This minor mode allows you to toggle a window's "dedicated" flag. When
+a window is "dedicated", Emacs will not select files into that
+window. This can be quite handy since many commands will use another
+window to show results (e.g., compilation mode, starting info, etc.) A
+dedicated window won't be used for such a purpose.
+#+END_QUOTE
+
+Github: https://github.com/emacsmirror/dedicated
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(dedicated :fetcher github :repo "emacsmirror/dedicated"))
+(require 'dedicated)
+#+END_SRC
+
+*** dired and dired+
+
+#+BEGIN_QUOTE
+Dired makes an Emacs buffer containing a listing of a directory, and
+optionally some of its subdirectories as well.  You can use the normal
+Emacs commands to move around in this buffer, and special Dired commands
+to operate on the listed files.
+#+END_QUOTE
+
+Dired is nice way to browse the directory tree. Also, =dired+= which
+
+#+BEGIN_QUOTE
+extends functionalities provided by standard GNU Emacs libraries dired.el, 
+dired-aux.el, and dired-x.el. The standard functions are all available, 
+plus many more.
+#+END_QUOTE
+
+http://www.emacswiki.org/pics/static/DrewsEmacsDiredLine.jpg
+
+See the [[http://www.emacswiki.org/emacs/DiredPlus][EmacsWiki]] for detailed information on =dired+=.
+
+Being in a dired buffer it is possible to make the buffer writable and
+thus rename files and permissions by editing the buffer. Use =C-x C-q=
+which runs the command =dired-toggle-read-only= to make that possible.
+
+=dired-jump= (mapped to =C-h C-d=) jumps to Dired buffer corresponding to
+current buffer.
+
+#+BEGIN_SRC emacs-lisp
+  (quelpa '(dired+ :fetcher wiki))
+  (setq dired-auto-revert-buffer t)
+  (setq dired-no-confirm 
+        '(byte-compile chgrp chmod chown copy delete load move symlink))
+  (setq dired-deletion-confirmer (lambda (x) t))
+  (setq wdired-allow-to-change-permissions t) ; allow changing of file permissions
+  (toggle-diredp-find-file-reuse-dir 1)
+  (setq diredp-hide-details-initially-flag nil)
+  (setq diredp-hide-details-propagate-flag nil)
+#+END_SRC
+
+It seems that both flags are necessary to make dired+ not hide the
+details.  =toggle-diredp-find-file-reuse-dir= will make sure that
+there is only one buffer kept around for =dired=. Normally =dired=
+creates a buffer for every opened directory.
+
+*** helm
+
+#+BEGIN_QUOTE
+Helm is incremental completion and selection narrowing framework for
+Emacs. It will help steer you in the right direction when you're
+looking for stuff in Emacs (like buffers, files, etc).
+
+Helm is a fork of anything.el originaly written by Tamas Patrovic and
+can be considered to be its successor. Helm sets out to clean up the
+legacy code in anything.el and provide a cleaner, leaner and more
+modular tool, that's not tied in the trap of backward compatibility.
+#+END_QUOTE
+
+The Helm source code can be found [[https://github.com/emacs-helm/helm][at Github]].
+
+Ref. [[https://github.com/emacs-helm/helm/wiki][Helm Wiki]] for detailed instructions on how Helm works.
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(helm :repo "emacs-helm/helm" :fetcher github :files ("*.el" "emacs-helm.sh")))
+(quelpa '(helm-descbinds :repo "emacs-helm/helm-descbinds" :fetcher github))
+(quelpa '(helm-gtags :repo "syohex/emacs-helm-gtags" :fetcher github :files ("helm-gtags.el")))
+(quelpa '(helm-projectile :repo "bbatsov/projectile" :fetcher github :files ("helm-projectile.el")))
+(require 'helm-config)
+(setq helm-mode-handle-completion-in-region nil) ; don't use helm for `completion-at-point'
+(helm-mode 1)
+(helm-gtags-mode 1)
+(helm-descbinds-mode)
+(setq helm-idle-delay 0.1)
+(setq helm-input-idle-delay 0.1)
+(setq helm-buffer-max-length 50)
+(setq helm-M-x-always-save-history t)
+(setq helm-buffer-details-flag nil)
+(add-to-list 'helm-completing-read-handlers-alist '(org-refile)) ; helm-mode does not do org-refile well
+(add-to-list 'helm-completing-read-handlers-alist '(org-agenda-refile)) ; same goes for org-agenda-refile
+#+END_SRC
+
+*** helm-swoop
+
+=helm-swoop= is a great Helm powered buffer search/occur interface:
+
+#+CAPTION: helm-swoop
+#+NAME: fig:swoop
+https://raw.github.com/ShingoFukuyama/images/master/helm-multi-swoop.gif
+
+Github: https://github.com/ShingoFukuyama/helm-swoop
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(helm-swoop :repo "ShingoFukuyama/helm-swoop" :fetcher github))
+(define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
+#+END_SRC
+
+*** howdoi
+
+#+BEGIN_QUOTE
+Do you find yourself constantly Googling for how to do basic
+programing tasks? Suppose you want to know how to format a date in
+bash. Why open your browser and read through blogs when you can just
+M-x howdoi-query RET format date bash RET
+
+Howdoi.el is a way to query Stack Overflow directly from the Emacs and
+get back the most upvoted answer to the first question that comes up
+for that query.
+#+END_QUOTE
+
+Github: https://github.com/atykhonov/emacs-howdoi
+
+Very useful. Saves a lot of time by not having to go through that
+boring "emacs -> browser -> search engine -> stackoverflow -> emacs"
+loop...
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(howdoi :repo "atykhonov/emacs-howdoi" :fetcher github))
+#+END_SRC
+
+*** ido-mode
+
+#+BEGIN_EXAMPLE
+Interactively do things with buffers and files
+#+END_EXAMPLE
+
+Great mode to quickly select buffers/files etc. Is built into Emacs since v22.
+
+Select the previous match with =C-r= and next match with =C-s=.
+To open =dired= at the current location press =C-d=.
+Make a directory with =M-m=.
+
+Use =C-j= if you want to create a file with what you have entered (and not the match).
+
+#+BEGIN_SRC emacs-lisp
+(setq ido-enable-flex-matching t
+      ido-auto-merge-work-directories-length -1
+      ido-create-new-buffer 'always
+      ido-everywhere t
+      ido-default-buffer-method 'selected-window
+      ido-max-prospects 32
+      ido-use-filename-at-point 'guess
+      )
+(ido-mode 1)
+(quelpa '(flx-ido :repo "lewang/flx" :fetcher github :files ("flx-ido.el")))
+(flx-ido-mode 1)
+(setq ido-use-faces nil)
+#+END_SRC
+
+flx-ido improves the flex matching. 
+
+Github: https://github.com/lewang/flx
+
+*** move-text
+
+Allows to move the current line or region up/down. The source code is
+on the Wiki: http://www.emacswiki.org/emacs/move-text.el
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(move-text :fetcher wiki))
+(require 'move-text)
+#+END_SRC
+
+*** multiple-cursors
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(multiple-cursors :fetcher github :repo "magnars/multiple-cursors.el"))
+#+END_SRC
+
+*** projectile
+
+#+BEGIN_QUOTE
+Projectile is a project interaction library for Emacs. Its goal is to
+provide a nice set of features operating on a project level without
+introducing external dependencies(when feasible). For instance -
+finding project files has a portable implementation written in pure
+Emacs Lisp without the use of GNU find(but for performance sake an
+indexing mechanism backed by external commands exists as well).
+#+END_QUOTE
+
+Projectile is written by Bozhidar Batsov.
+
+Github: https://github.com/bbatsov/projectile
+
+https://raw.github.com/bbatsov/projectile/master/screenshots/projectile.png
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(projectile :repo "bbatsov/projectile" :fetcher github :files ("projectile.el")))
+(require 'projectile nil t)
+#+END_SRC
+*** recentf
+#+BEGIN_QUOTE
+This package maintains a menu for visiting files that were operated on
+recently.  When enabled a new "Open Recent" sub menu is displayed in
+the "File" menu.  The recent files list is automatically saved across
+Emacs sessions.  You can customize the number of recent files
+displayed, the location of the menu and others options (see the source
+code for details).
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(setq recentf-save-file (expand-file-name "~/.recentf"))
+(recentf-mode 1)
+#+END_SRC
+
+*** saveplace
+
+#+BEGIN_QUOTE
+Automatically save place in each file. This means when you visit a file, point goes to the last place
+where it was when you previously visited the same file.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(require 'saveplace)
+(setq-default save-place t)
+#+END_SRC
+*** savehist
+
+#+BEGIN_QUOTE
+Many editors (e.g. Vim) have the feature of saving minibuffer history
+to an external file after exit.  This package provides the same
+feature in Emacs. When set up, it saves recorded minibuffer histories
+to a file.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(setq savehist-additional-variables '(kill-ring mark-ring global-mark-ring search-ring regexp-search-ring extended-command-history))
+(savehist-mode 1)
+#+END_SRC
+
+Add variables like the =extended-command-history= to persist.
+*** shell-switcher
+#+BEGIN_QUOTE
+An emacs minor mode to easily switch between shell buffers (like with alt+tab)
+#+END_QUOTE
+
+Github: https://github.com/DamienCassou/shell-switcher
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(shell-switcher :fetcher github 
+          :repo "DamienCassou/shell-switcher" 
+          :files ("rswitcher.el" "shell-switcher.el")))
+(setq shell-switcher-new-shell-function 'shell-switcher-make-ansi-term)
+(setq shell-switcher-mode t)
+(require 'shell-switcher)
+#+END_SRC
+*** smart-mode-line
+
+#+BEGIN_QUOTE
+Smart Mode Line is a sexy mode-line for Emacs, that aims to be easy to read from small to large monitors by using a prefix feature and smart truncation.
+#+END_QUOTE
+
+https://raw.github.com/Bruce-Connor/smart-mode-line/master/screenshot-2013-11-11-dark.png
+
+It is written by Artur Bruce-Connor. The default Emacs mode-line has some shortcomings and =sml= does a good job at improving it.
+
+Github: https://github.com/Bruce-Connor/smart-mode-line
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(smart-mode-line :repo "Bruce-Connor/smart-mode-line" :fetcher github))
+(setq sml/vc-mode-show-backend t)
+(setq sml/no-confirm-load-theme t)
+(sml/setup)
+(sml/apply-theme 'respectful)
+#+END_SRC
+
+Show the encoding and add VC information to the mode-line.
+
+*** vlf
+#+BEGIN_QUOTE
+Emacs minor mode that allows viewing, editing, searching and comparing large files in batches. Batch size can be adjusted on the fly and bounds the memory that is to be used for operations on the file. This way multiple large files can be instantly and simultaneously accessed without swapping and degraded performance.
+#+END_QUOTE
+
+Github: https://github.com/m00natic/vlfi
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(vlf :repo "m00natic/vlfi" :fetcher github :old-names (vlfi)))
+(setq vlf-application 'dont-ask)        ; just do it
+(setq vlf-batch-size 8192)              ; a bit more text per batch please
+(require 'vlf-integrate)                ; just do it for real
+#+END_SRC
 
 * Writing
+*** auctex-mode
+
+#+BEGIN_QUOTE
+AUCTEX is an extensible package for writing and formatting TEX files in GNU Emacs and XEmacs. It supports many different TEX macro packages, including AMS-TEX, LATEX, Texinfo, ConTEXt, and docTEX (dtx files).
+#+END_QUOTE
+
+https://www.gnu.org/software/auctex/img/preview-screenshot.png
+
+#+BEGIN_SRC emacs-lisp
+(load "auctex")
+#+END_SRC
+
+Set up pdf viewer and others.
+
+*** org-mode
+
+#+BEGIN_SRC emacs-lisp
+(require 'ox-latex)
+(require 'ox-beamer)
+(setq org-clock-persist 'history)
+#+END_SRC
+
+Load org-mode latex options
+
+**** Add Export on Save Option
+
+Add two options one for documents, another for beamer presentation, that 
+automatically exports org to latex upon saving the org document.
+
+#+BEGIN_SRC emacs-lisp
+(defun is-flag-set? (in-str)
+  "Check if LEOS flag is set"
+  (let ((leos-string
+         (save-excursion
+           (save-restriction
+             (widen)
+             (goto-char (point-min))
+             (and (re-search-forward
+                   (format "^#\\+%s:[ \t]*\\([-/a-zA-Z]+\\)"
+                           in-str) nil t)
+                  (match-string 1))))))
+    (if (and leos-string
+             (string= leos-string "t"))
+        t
+      nil)))
+
+(defun is-leos? ()
+  "Check if LEOS flag is set"
+  (is-flag-set? "LATEX_EXPORT_ON_SAVE"))
+
+(defun org-insert-leos-option ()
+  "Insert the Latex Export on Save option"
+  (interactive)
+  (if (not (bolp)) (newline))
+  (insert "#+LATEX_EXPORT_ON_SAVE: t"))
+
+(defun is-beamer-leos? ()
+  "Check if LEOS flag is set"
+  (is-flag-set? "LATEX_BEAMER_EXPORT_ON_SAVE"))
+
+(defun org-insert-beamer-leos-option ()
+  "Insert the Latex Export on Save option"
+  (interactive)
+  (if (not (bolp)) (newline))
+  (insert "#+LATEX_BEAMER_EXPORT_ON_SAVE: t"))
+
+(defun org-mode-export-on-save-hook ()
+  "Org mode to save as latex hook"
+  (if (is-leos?)
+      (org-latex-export-to-latex))
+  (if (is-beamer-leos?)
+      (org-beamer-export-to-latex)))
+
+(add-hook 'org-mode-hook
+          (lambda ()
+            (add-hook 'after-save-hook
+                      'org-mode-export-on-save-hook
+                      nil 'make-it-local)))
+
+(defun test-leos ()
+  (interactive)
+  (message (if (is-leos?) "hello" "no!")))
+#+END_SRC
+
+**** Using latexmk 
+
+#+BEGIN_SRC emacs-lisp
+(setq org-export-latex-listings t)
+
+;; Originally taken from Bruno Tavernier
+;: http://thread.gmane.org/gmane.emacs.orgmode/31150/focus=31432
+;; but adapted to use latexmk 4.20 or higher.
+;; updated to org-mode 8.05
+(defun my-auto-tex-cmd(inarg)
+  "When exporting from .org with latex, automatically run latex,
+     pdflatex, or xelatex as appropriate, using latexmk."
+  (let ((texcmd)))
+  ;; default command: oldstyle latex via dvi
+  (setq texcmd "latexmk -dvi -pdfps -quiet -output-directory=%o %f")
+  ;; pdflatex -> .pdf
+  (if (string-match "LATEX_CMD: pdflatex" (buffer-string))
+      (setq texcmd "latexmk -pdf -quiet -output-directory=%o %f"))
+  ;; xelatex -> .pdf
+  (if (string-match "LATEX_CMD: xelatex" (buffer-string))
+      (setq texcmd "latexmk -pdflatex=xelatex -pdf -quiet -output-directory=%o %f"))
+  ;; LaTeX compilation command
+  (setq org-latex-pdf-process (list texcmd)))
+
+(add-hook 'org-export-before-processing-hook 'my-auto-tex-cmd)
+;;(add-hook 'org-export-latex-after-initial-vars-hook 'my-auto-tex-cmd)
+#+END_SRC
+
+latexmk command for pdf export. Use xelatex or pdflatex depending upon what
+command is being selected.
+
+**** Default packages  to include
+#+BEGIN_SRC emacs-lisp
+;; Specify default packages to be included in every tex file, whether pdflatex or xelatex
+(setq org-latex-packages-alist
+      '(("" "graphicx" t)
+        ("" "longtable" nil)
+        ("" "float" nil)))
+
+(defun my-auto-tex-parameters (inarg)
+      "Automatically select the tex packages to include."
+      ;; default packages for ordinary latex or pdflatex export
+      (setq org-latex-default-packages-alist
+            '(("AUTO" "inputenc" t)
+              ("T1"   "fontenc"   t)
+              (""     "fixltx2e"  nil)
+              (""     "wrapfig"   nil)
+              (""     "soul"      t)
+              (""     "textcomp"  t)
+              (""     "marvosym"  t)
+              (""     "wasysym"   t)
+              (""     "latexsym"  t)
+              (""     "amssymb"   t)
+              (""     "hyperref"  nil)))
+
+      (if (string-match "LATEX_LANG: tamil" (buffer-string))
+          (setq org-latex-default-packages-alist
+                '(("" "fontspec" t)
+                  ("" "xunicode" t)
+                  ("" "xltxtra" t)
+                  ("xetex" "hyperref" nil)
+                  )))
+
+      ;; Packages to include when xelatex is used
+      (if (string-match "LATEX_CMD: xelatex" (buffer-string))
+          (setq org-latex-default-packages-alist
+                '(("" "url" t)
+                  ("" "rotating" t)
+                  ("american" "babel" t)
+                  ("babel" "csquotes" t)
+                  ("" "soul" t)
+                  ("xetex" "hyperref" nil)
+                  ))))
+
+(add-hook 'org-export-before-processing-hook 'my-auto-tex-parameters)
+#+END_SRC
+
+Add packages based on wether the command xelatex or pdflatex.
+
+**** xelatex article
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'org-latex-classes
+             '("xelatex-article"
+              "\\documentclass[11pt,article,oneside]{memoir}"
+              ("\\section{%s}" . "\\section*{%s}")
+              ("\\subsection{%s}" . "\\subsection*{%s}")
+              ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+              ("\\paragraph{%s}" . "\\paragraph*{%s}")
+              ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+#+END_SRC
+
+Add a custom article type =xelatex-article=, a memoir article.
+
+**** APS Article
+
+#+BEGIN_SRC emacs-lisp
+(defun org-insert-aps-article-header ()
+  "Insert header for APS Report"
+  (interactive)
+  (if (not (bolp)) (newline))
+  (insert "#+TITLE: Annual Progress Seminar Report
+#+AUTHOR: Sriram Ponnambalam C (10405602) Guide : Prof. Srinivas Aluru
+#+EMAIL:
+#+DATE:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:
+#+LINK_HOME:
+#+XSLT:
+#+LaTeX_CLASS: aps-article
+#+LaTeX_CLASS_OPTIONS: [integrals, nointegrals, article, 11pt, a4paper]
+#+LATEX_HEADER: \\usepackage{geometry}
+#+LATEX_HEADER: \\usepackage{amsmath}
+#+LATEX_HEADER: \\usepackage[MnSymbol]{mathspec}
+#+LATEX_HEADER: \\usepackage{fontspec}
+#+LATEX_HEADER: \\usepackage{xltxtra}
+#+LATEX_HEADER: \\setprimaryfont{Minion Pro}
+#+LATEX_HEADER: \\setmainfont[Mapping=tex-text]{Minion Pro}
+#+LATEX_HEADER: \\setsansfont[Mapping=tex-text]{Myriad Pro}
+#+LATEX_HEADER: \\setmathsfont[Set=Greek,Uppercase=Italic,Lowercase=Italic]{Minion Pro}
+#+LATEX_HEADER: \\font\\TitleFont=\"Myriad Pro:letterspace=10,+smcp\" at 24 pt
+#+LATEX_HEADER: \\setcounter{secnumdepth}{2}
+#+LATEX_HEADER: \\geometry{a4paper, textwidth=6.5in, textheight=10in, marginparsep=7pt, marginparwidth=.6in}
+#+LaTeX_HEADER: \\usepackage{amsthm}
+#+LaTeX_HEADER: \\newtheorem{theorem}{Theorem}[section]
+#+LaTeX_HEADER: \\newtheorem{lemma}[theorem]{Lemma}
+#+LATEX_CMD: xelatex
+#+LATEX_EXPORT_ON_SAVE: t
+"))
+
+;; Custom article classes
+(add-to-list 'org-latex-classes
+             '("aps-article"
+              "\\documentclass[11pt,article,oneside]{memoir}
+              [DEFAULT-PACKAGES]
+              [PACKAGES]
+              [EXTRA]"
+              ("\\chapter{%s}" . "\\chapter*{%s}")
+              ("\\section{%s}" . "\\section*{%s}")
+              ("\\subsection{%s}" . "\\subsection*{%s}")
+              ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+              ("\\paragraph{%s}" . "\\paragraph*{%s}")
+              ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+#+END_SRC
+
+Custom article type =aps-article=, a memoir article with Minion Pro.
+
+**** tamil book/article
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'org-latex-classes
+             '("kamban-book"
+              "\\documentclass[11pt,draft,twoside,a4paper]{kamban}"
+              ("\\part{%s}" . "\\part*{%s}")
+              ("\\chapter{%s}" . "\\chapter*{%s}")
+              ("\\section{%s}" . "\\section*{%s}")
+              ("\\subsection{%s}" . "\\subsection*{%s}")
+              ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+              ("\\paragraph{%s}" . "\\paragraph*{%s}")
+              ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+(add-to-list 'org-latex-classes
+             '("tamil-article"
+              "\\documentclass[11pt,article,oneside]{memoir}"
+              ("\\section{%s}" . "\\section*{%s}")
+              ("\\subsection{%s}" . "\\subsection*{%s}")
+              ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+              ("\\paragraph{%s}" . "\\paragraph*{%s}")
+              ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((latex . t)))
+#+END_SRC
+
+Cutom document type =kamban-book= and =tamil-article= for tamil books
+and articles respectively.
+
+**** memoir article with xelatex
+
+#+BEGIN_SRC emacs-lisp
+(defun org-insert-memoir-article-header ()
+  "Insert header for a Memoir Article"
+  (interactive)
+  (if (not (bolp)) (newline))
+  (insert "#+TITLE: TODO - Insert title
+#+AUTHOR: TODO - Insert Author
+#+EMAIL:
+#+DATE:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:nil \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:
+#+LINK_HOME:
+#+XSLT:
+#+LaTeX_CLASS: memoir-article
+#+LaTeX_CLASS_OPTIONS: [integrals, nointegrals, article, 11pt, a4paper]
+#+LATEX_HEADER: \\usepackage{geometry}
+#+LATEX_HEADER: \\usepackage{amsmath}
+#+LATEX_HEADER: \\usepackage[MnSymbol]{mathspec}
+#+LATEX_HEADER: \\usepackage{fontspec}
+#+LATEX_HEADER: \\usepackage{xltxtra}
+#+LATEX_HEADER: \\setprimaryfont{Minion Pro}
+#+LATEX_HEADER: \\setmainfont[Mapping=tex-text]{Minion Pro}
+#+LATEX_HEADER: \\setsansfont[Mapping=tex-text]{Myriad Pro}
+#+LATEX_HEADER: \\setmathsfont[Set=Greek,Uppercase=Italic,Lowercase=Italic]{Minion Pro}
+#+LATEX_HEADER: \\font\\TitleFont=\"Myriad Pro:letterspace=10,+smcp\" at 24 pt
+#+LATEX_HEADER: \\setcounter{secnumdepth}{2}
+#+LATEX_HEADER: \\geometry{a4paper, textwidth=6.5in, textheight=10in, marginparsep=7pt, marginparwidth=.6in}
+#+LaTeX_HEADER: \\usepackage{amsthm}
+#+LaTeX_HEADER: \\newtheorem{theorem}{Theorem}[section]
+#+LaTeX_HEADER: \\newtheorem{lemma}[theorem]{Lemma}
+#+LATEX_CMD: xelatex
+#+LATEX_EXPORT_ON_SAVE: t
+"))
+(add-to-list 'org-latex-classes
+             '("memoir-article"
+              "\\documentclass[11pt,article,oneside]{memoir}
+              [DEFAULT-PACKAGES]
+              [PACKAGES]
+              [EXTRA]"
+              ("\\chapter{%s}" . "\\chapter*{%s}")
+              ("\\section{%s}" . "\\section*{%s}")
+              ("\\subsection{%s}" . "\\subsection*{%s}")
+              ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+              ("\\paragraph{%s}" . "\\paragraph*{%s}")
+              ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+#+END_SRC
+
+Memoir article with Minion Pro font
+
+**** memoir article with pdflatex
+
+#+BEGIN_SRC emacs-lisp
+(defun org-insert-pdflatex-article-header ()
+  "Insert header for Simple pdflatex"
+  (interactive)
+  (if (not (bolp)) (newline))
+  (insert "#+TITLE: TODO - Insert title
+#+AUTHOR: TODO - Insert Author
+#+EMAIL:
+#+DATE:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \\n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:
+#+LINK_HOME:
+#+XSLT:
+#+LaTeX_CLASS: memoir-pdflatex-article
+#+LaTeX_CLASS_OPTIONS: [integrals, nointegrals, article, 11pt, a4paper]
+#+LATEX_HEADER: \\usepackage{geometry}
+#+LATEX_HEADER: \\usepackage{amsmath}
+#+LATEX_HEADER: \\setcounter{secnumdepth}{2}
+#+LATEX_HEADER: \\geometry{a4paper, textwidth=6.5in, textheight=10in, marginparsep=7pt, marginparwidth=.6in}
+#+LaTeX_HEADER: \\usepackage{amsthm}
+#+LaTeX_HEADER: \\newtheorem{theorem}{Theorem}[section]
+#+LaTeX_HEADER: \\newtheorem{lemma}[theorem]{Lemma}
+#+LATEX_CMD: pdflatex
+#+LATEX_EXPORT_ON_SAVE: t
+"))
+
+(add-to-list 'org-latex-classes
+             '("memoir-pdflatex-article"
+              "\\documentclass[11pt,article,oneside]{memoir}
+              [DEFAULT-PACKAGES]
+              [PACKAGES]
+              [EXTRA]"
+              ("\\chapter{%s}" . "\\chapter*{%s}")
+              ("\\section{%s}" . "\\section*{%s}")
+              ("\\subsection{%s}" . "\\subsection*{%s}")
+              ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+              ("\\paragraph{%s}" . "\\paragraph*{%s}")
+              ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+
+#+END_SRC
+
+memoir article with the default pdflatex.
+
+*** markdown-mode
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(markdown-mode :url "git://jblevins.org/git/markdown-mode.git"
+                        :fetcher git))
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . gfm-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . gfm-mode))
+#+END_SRC
+
+Enable markdown-mode when the file suffixes match.
 
 
 * Programming 
+*** cider
+
+#+BEGIN_QUOTE
+CIDER is Clojure IDE and REPL for Emacs, built on top of nREPL, the Clojure networked REPL server. It's a great alternative to the now deprecated combination of SLIME + swank-clojure.
+#+END_QUOTE
+
+https://raw.github.com/clojure-emacs/cider/master/logo/cider-logo-w480.png
+
+It was formerly called =nrepl.el= and is written by Bozhidar Batsov.
+
+Github: https://github.com/clojure-emacs/cider
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(cider :fetcher github :repo "clojure-emacs/cider" :old-names (nrepl)))
+(setq cider-popup-stacktraces nil)
+(setq cider-repl-popup-stacktraces nil)
+(setq cider-repl-pop-to-buffer-on-connect t)
+(setq cider-repl-use-clojure-font-lock t)
+#+END_SRC
+
+Don't popup nasty stacktraces all over the place, please.
+
+*** diff-hl
+#+BEGIN_QUOTE
+diff-hl-mode highlights uncommitted changes on the left side of the
+window, allows you to jump between and revert them selectively.
+#+END_QUOTE
+
+Github: https://github.com/dgutov/diff-hl
+
+#+CAPTION: diff-hl
+#+NAME: fig:diff-hl
+https://raw.github.com/dgutov/diff-hl/master/screenshot.png
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(diff-hl :fetcher github :repo "dgutov/diff-hl"))
+(global-diff-hl-mode)
+#+END_SRC
+
+*** elisp-slime-nav
+#+BEGIN_QUOTE
+Slime-style navigation for Emacs Lisp
+
+Slime allows very convenient navigation to the symbol at point (using
+M-.), and the ability to pop back to previous marks (using M-,).
+
+This plugin provides similar navigation for Emacs Lisp, supporting
+navigation to the definitions of variables, functions, libraries and
+faces.
+#+END_QUOTE
+
+Github: https://github.com/purcell/elisp-slime-nav
+
+Don't spend so much time trying to get to the source of Elisp code
+(and back to where you were...)
+
+#+BEGIN_SRC emacs-lisp
+  (quelpa '(elisp-slime-nav :repo "purcell/elisp-slime-nav" :fetcher github))
+  (require 'elisp-slime-nav)
+  (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook 
+                                       lisp-interaction-mode-hook))
+    (add-hook hook 'elisp-slime-nav-mode))
+  (define-key elisp-slime-nav-mode-map (kbd "C-c C-d")
+    'my-show-help)
+  (define-key elisp-slime-nav-mode-map (kbd "C-c d") 
+    'elisp-slime-nav-describe-elisp-thing-at-point)
+#+END_SRC
+
+*** eval-sexp-fu
+
+Flash some lights when evaluating expressions. See the EmacsWiki for
+some more info: http://www.emacswiki.org/emacs/EvalSexpFu
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(eval-sexp-fu :fetcher wiki :files ("eval-sexp-fu.el")))
+(require 'eval-sexp-fu)
+(setq eval-sexp-fu-flash-duration 0.4)
+(turn-on-eval-sexp-fu-flash-mode)
+(define-key lisp-interaction-mode-map (kbd "C-c C-c") 'eval-sexp-fu-eval-sexp-inner-list)
+(define-key lisp-interaction-mode-map (kbd "C-c C-e") 'eval-sexp-fu-eval-sexp-inner-sexp)
+(define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-sexp-fu-eval-sexp-inner-list)
+(define-key emacs-lisp-mode-map (kbd "C-c C-e") 'eval-sexp-fu-eval-sexp-inner-sexp)
+#+END_SRC
+
+*** fixmee
+#+BEGIN_QUOTE
+Fixmee-mode tracks fixme notices in code comments, highlights them,
+ranks them by urgency, and lets you navigate to them quickly.
+
+A distinguishing feature of this library is that it tracks the urgency
+of each notice, allowing the user to jump directly to the most
+important problems.
+#+END_QUOTE
+
+=fixmee= was written by Roland Walker and lives on Github:
+https://github.com/rolandwalker/fixmee
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(quelpa '(fixmee :repo "rolandwalker/fixmee" :fetcher github))
+(global-fixmee-mode 1)
+#+END_SRC
+
+*** js2-mode
+
+#+BEGIN_QUOTE
+Improved JavaScript editing mode for GNU Emacs
+#+END_QUOTE
+
+Github: https://github.com/mooz/js2-mode
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(js2-mode :repo "mooz/js2-mode" :fetcher github))
+(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+(add-hook 'js2-mode-hook 'flycheck-mode)
+#+END_SRC
+
+*** json-mode
+
+#+BEGIN_QUOTE
+Major mode for editing JSON files.
+Extends the builtin js-mode to add better syntax highlighting for JSON.
+#+END_QUOTE
+
+Github: https://github.com/joshwnj/json-mode
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(json-mode :fetcher github :repo "joshwnj/json-mode"))
+(add-to-list 'auto-mode-alist '("\\.json\\'" . json-mode))
+#+END_SRC
+
+*** magit
+
+Magit is the king of Git interaction for Emacs.
+
+http://www.masteringemacs.org/wp-content/uploads/Screenshot-from-2013-12-06-142317.png
+
+There's a short [[http://www.emacswiki.org/emacs/Magit#toc1][Crash Course on Emacswiki]]:
+
+#+BEGIN_SRC org
+- M-x magit-status to see git status, and in the status buffer:
+- s to stage files
+- c to commit (type in your commit message then C-c C-c to save the message and commit)
+- b b to switch to a branch
+
+Other handy keys:
+
+- P P to do a git push
+- F F to do a git pull
+
+try to press TAB
+#+END_SRC
+
+I have bound =magit-status= to =C-c g= and =magit-log= to =C-c l=.
+
+See the [[http://magit.github.io/magit/magit.html][Magit manual]] for more information.
+
+#+BEGIN_SRC emacs-lisp
+  (quelpa '(magit :fetcher github
+                  :repo "magit/magit"
+                  :files ("magit.el" "magit-bisect.el" "magit-blame.el" 
+                          "magit-key-mode.el" "magit-popup.el" "magit-wip.el"
+                          "magit.texi" "AUTHORS.md" "README.md")))
+  (when (fboundp 'file-notify-add-watch)
+    (quelpa '(magit-filenotify :fetcher github :repo "magit/magit-filenotify"))
+    (add-hook 'magit-status-mode-hook 'magit-filenotify-mode))
+  (setq magit-save-some-buffers nil) ;don't ask to save buffers
+  (setq magit-set-upstream-on-push t) ;ask to set upstream
+  (setq magit-diff-refine-hunk t) ;show word-based diff for current hunk
+  (setq magit-default-tracking-name-function
+        'magit-default-tracking-name-branch-only) ;don't track with origin-*
+#+END_SRC
+
+Committing should act like =git commit -a= by default.
+
+*** prog-mode
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'prog-mode-hook (lambda () (interactive) (setq show-trailing-whitespace 1)))
+#+END_SRC
+
+Show whitespace errors in all programming modes by turning on =show-trailing-whitespace= in these modes.
+*** python
+*** smartparens
+
+#+BEGIN_QUOTE
+Smartparens is minor mode for Emacs that deals with parens pairs and
+tries to be smart about it. It started as a unification effort to
+combine functionality of several existing packages in a single,
+compatible and extensible way to deal with parentheses, delimiters,
+tags and the like.
+#+END_QUOTE
+
+Github: https://github.com/Fuco1/smartparens
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(smartparens :fetcher github :repo "Fuco1/smartparens"))
+(require 'smartparens-config)
+(smartparens-global-mode t)
+;; "fix"" highlight issue in scratch buffer
+(custom-set-faces '(sp-pair-overlay-face ((t ()))))
+#+END_SRC
+
+* TODO
+1. python 
+   - Simple :
+     https://github.com/eschulte/emacs24-starter-kit/blob/master/starter-kit-python.org
+   - Prelude uses Anaconda
+     https://github.com/srirampc/prelude/blob/master/modules/prelude-python.el 
+   - Jedi
+2. R ess
+   - https://github.com/emacs-ess/ESS
+3. C/C++
+   - clang completion
+4. Automatic removal of end of line spaces
+5. Automatic wrap at 80 characters
+6. key bindings
+7. Explore company mode 
