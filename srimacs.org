@@ -8,7 +8,7 @@ eschulte's [[https://github.com/eschulte/emacs24-starter-kit][starter kit]] and 
 * Basics
 ** Install Packages outside of MELPA
 This is a workaround. Need to handle this appropriately.
-*** auctex 
+*** auctex
 #+BEGIN_SRC emacs-lisp
 (if (not (package-installed-p 'auctex))
     (package-install 'auctex))
@@ -142,6 +142,8 @@ Maximize and full frame all emacs
  mark-ring-max 5000                     ;truncate mark ring after 5000 entries
  mouse-autoselect-window -.1            ;window focus follows the mouse pointer
  show-paren-delay 0
+ ring-bell-function 'ignore             ;ignore the bell
+ x-select-enable-clipboard t
  )
 #+END_SRC
 
@@ -167,6 +169,7 @@ Also Emacs should be able to kill processes without asking which is achieved in 
  indent-tabs-mode nil                   ;use spaces instead of tabs
  c-basic-offset 4                       ;"tab" with in c-related modes
  c-hungry-delete-key t                  ;delete more than one space
+ fill-column 72
  )
 #+END_SRC
 
@@ -288,9 +291,24 @@ Pass symbol-name to the function DOC-FUNCTION."
     (my-show-help)))
 #+END_SRC
 
-Get documentation popup without having to trigger auto-complete. It's mostly 
+Get documentation popup without having to trigger auto-complete. It's mostly
 stolen from [[http://jaderholm.com/][Scott Jaderholm]] (the code is on [[http://www.emacswiki.org/emacs/AutoComplete][Emacswiki]]), but has been made more
-general to also work with other completion functions. 
+general to also work with other completion functions.
+
+*** my-cleanup-whitepaces
+#+BEGIN_SRC emacs-lisp
+;;remove all trailing whitespace and trailing blank lines before
+;;saving the file
+;; Taken from emacs-live
+(defvar my-ignore-whitespace-modes '(markdown-mode))
+(defun my-cleanup-whitespace ()
+  (if (not (member major-mode my-ignore-whitespace-modes))
+      (let ((whitespace-style '(trailing empty)) )
+        (whitespace-cleanup))))
+
+(add-hook 'before-save-hook 'my-cleanup-whitespace)
+#+END_SRC
+Cleanup white spaces before saving.
 
 * Power Tools
 *** buffer-move
@@ -368,8 +386,8 @@ to operate on the listed files.
 Dired is nice way to browse the directory tree. Also, =dired+= which
 
 #+BEGIN_QUOTE
-extends functionalities provided by standard GNU Emacs libraries dired.el, 
-dired-aux.el, and dired-x.el. The standard functions are all available, 
+extends functionalities provided by standard GNU Emacs libraries dired.el,
+dired-aux.el, and dired-x.el. The standard functions are all available,
 plus many more.
 #+END_QUOTE
 
@@ -387,7 +405,7 @@ current buffer.
 #+BEGIN_SRC emacs-lisp
   (quelpa '(dired+ :fetcher wiki))
   (setq dired-auto-revert-buffer t)
-  (setq dired-no-confirm 
+  (setq dired-no-confirm
         '(byte-compile chgrp chmod chown copy delete load move symlink))
   (setq dired-deletion-confirmer (lambda (x) t))
   (setq wdired-allow-to-change-permissions t) ; allow changing of file permissions
@@ -504,7 +522,7 @@ Use =C-j= if you want to create a file with what you have entered (and not the m
 (setq ido-use-faces nil)
 #+END_SRC
 
-flx-ido improves the flex matching. 
+flx-ido improves the flex matching.
 
 Github: https://github.com/lewang/flx
 
@@ -581,8 +599,13 @@ to a file.
 #+END_QUOTE
 
 #+BEGIN_SRC emacs-lisp
-(setq savehist-additional-variables '(kill-ring mark-ring global-mark-ring search-ring regexp-search-ring extended-command-history))
-(savehist-mode 1)
+  (setq savehist-additional-variables
+        '(kill-ring mark-ring global-mark-ring
+          search-ring regexp-search-ring
+          extended-command-history)
+        ;; save every minute
+        savehist-autosave-interval 60)
+  (savehist-mode 1)
 #+END_SRC
 
 Add variables like the =extended-command-history= to persist.
@@ -594,8 +617,8 @@ An emacs minor mode to easily switch between shell buffers (like with alt+tab)
 Github: https://github.com/DamienCassou/shell-switcher
 
 #+BEGIN_SRC emacs-lisp
-(quelpa '(shell-switcher :fetcher github 
-          :repo "DamienCassou/shell-switcher" 
+(quelpa '(shell-switcher :fetcher github
+          :repo "DamienCassou/shell-switcher"
           :files ("rswitcher.el" "shell-switcher.el")))
 (setq shell-switcher-new-shell-function 'shell-switcher-make-ansi-term)
 (setq shell-switcher-mode t)
@@ -664,7 +687,7 @@ Load org-mode latex options
 
 **** Add Export on Save Option
 
-Add two options one for documents, another for beamer presentation, that 
+Add two options one for documents, another for beamer presentation, that
 automatically exports org to latex upon saving the org document.
 
 #+BEGIN_SRC emacs-lisp
@@ -722,7 +745,7 @@ automatically exports org to latex upon saving the org document.
   (message (if (is-leos?) "hello" "no!")))
 #+END_SRC
 
-**** Using latexmk 
+**** Using latexmk
 
 #+BEGIN_SRC emacs-lisp
 (setq org-export-latex-listings t)
@@ -1030,7 +1053,7 @@ memoir article with the default pdflatex.
 Enable markdown-mode when the file suffixes match.
 
 
-* Programming 
+* Programming
 *** cider
 
 #+BEGIN_QUOTE
@@ -1068,51 +1091,6 @@ https://raw.github.com/dgutov/diff-hl/master/screenshot.png
 #+BEGIN_SRC emacs-lisp
 (quelpa '(diff-hl :fetcher github :repo "dgutov/diff-hl"))
 (global-diff-hl-mode)
-#+END_SRC
-
-*** elisp-slime-nav
-#+BEGIN_QUOTE
-Slime-style navigation for Emacs Lisp
-
-Slime allows very convenient navigation to the symbol at point (using
-M-.), and the ability to pop back to previous marks (using M-,).
-
-This plugin provides similar navigation for Emacs Lisp, supporting
-navigation to the definitions of variables, functions, libraries and
-faces.
-#+END_QUOTE
-
-Github: https://github.com/purcell/elisp-slime-nav
-
-Don't spend so much time trying to get to the source of Elisp code
-(and back to where you were...)
-
-#+BEGIN_SRC emacs-lisp
-  (quelpa '(elisp-slime-nav :repo "purcell/elisp-slime-nav" :fetcher github))
-  (require 'elisp-slime-nav)
-  (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook 
-                                       lisp-interaction-mode-hook))
-    (add-hook hook 'elisp-slime-nav-mode))
-  (define-key elisp-slime-nav-mode-map (kbd "C-c C-d")
-    'my-show-help)
-  (define-key elisp-slime-nav-mode-map (kbd "C-c d") 
-    'elisp-slime-nav-describe-elisp-thing-at-point)
-#+END_SRC
-
-*** eval-sexp-fu
-
-Flash some lights when evaluating expressions. See the EmacsWiki for
-some more info: http://www.emacswiki.org/emacs/EvalSexpFu
-
-#+BEGIN_SRC emacs-lisp
-(quelpa '(eval-sexp-fu :fetcher wiki :files ("eval-sexp-fu.el")))
-(require 'eval-sexp-fu)
-(setq eval-sexp-fu-flash-duration 0.4)
-(turn-on-eval-sexp-fu-flash-mode)
-(define-key lisp-interaction-mode-map (kbd "C-c C-c") 'eval-sexp-fu-eval-sexp-inner-list)
-(define-key lisp-interaction-mode-map (kbd "C-c C-e") 'eval-sexp-fu-eval-sexp-inner-sexp)
-(define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-sexp-fu-eval-sexp-inner-list)
-(define-key emacs-lisp-mode-map (kbd "C-c C-e") 'eval-sexp-fu-eval-sexp-inner-sexp)
 #+END_SRC
 
 *** fixmee
@@ -1190,7 +1168,7 @@ See the [[http://magit.github.io/magit/magit.html][Magit manual]] for more infor
 #+BEGIN_SRC emacs-lisp
   (quelpa '(magit :fetcher github
                   :repo "magit/magit"
-                  :files ("magit.el" "magit-bisect.el" "magit-blame.el" 
+                  :files ("magit.el" "magit-bisect.el" "magit-blame.el"
                           "magit-key-mode.el" "magit-popup.el" "magit-wip.el"
                           "magit.texi" "AUTHORS.md" "README.md")))
   (when (fboundp 'file-notify-add-watch)
@@ -1234,17 +1212,26 @@ Github: https://github.com/Fuco1/smartparens
 #+END_SRC
 
 * TODO
-1. python 
+1. python
    - Simple :
      https://github.com/eschulte/emacs24-starter-kit/blob/master/starter-kit-python.org
    - Prelude uses Anaconda
-     https://github.com/srirampc/prelude/blob/master/modules/prelude-python.el 
+     https://github.com/srirampc/prelude/blob/master/modules/prelude-python.el
    - Jedi
 2. R ess
    - https://github.com/emacs-ess/ESS
 3. C/C++
    - clang completion
-4. Automatic removal of end of line spaces
-5. Automatic wrap at 80 characters
-6. key bindings
-7. Explore company mode 
+4. Other packages from emacs live
+   - Do it
+     - yasnippet (org mode config)
+     - wc-mode
+     - git-gutter (configure for hg too)
+   - May be
+     - ace jump
+     - highlight tail
+     - smex vs. helm
+5. Automatic removal of end of line spaces
+6. Automatic wrap at 80 characters
+7. key bindings
+8. Explore company mode
