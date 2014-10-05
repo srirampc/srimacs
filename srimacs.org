@@ -2,8 +2,8 @@
 #+Author: srirampc
 #+LATEX_EXPORT_ON_SAVE: nil
 
-+Shamelessy Copied+ Remixed from [[https://github.com/steckerhalter/][steckerhalter]],
-eschulte's [[https://github.com/eschulte/emacs24-starter-kit][starter kit]] and many others.
++Shamelessy Copied+ Heavily Inspired from [[https://github.com/steckerhalter/][steckerhalter]]. Uses code from
+[[https://github.com/overtone/emacs-live][emacs-live]], [[https://github.com/eschulte/emacs24-starter-kit][eschulte]], [[http://tuhdo.github.io/][tuhdo]] and many others.
 
 * Basics
 ** Install Packages outside of MELPA
@@ -85,42 +85,48 @@ a bit of Elisp code =gen-keys= and is spit out inside a code block via
 
 **** Key definition table                                          :noexport:
 #+TBLNAME: keys
-| Combo       | Category  | Desciption                                 | Command                                               |
-|-------------+-----------+--------------------------------------------+-------------------------------------------------------|
-| C-x C-k     | General   | Kill emacs                                 | 'kill-region                                          |
-| C-c C-k     | General   | Kill emacs                                 | 'kill-region                                          |
-| C-x C-g     | General   | Go to line                                 | 'goto-line                                            |
-| C-c C-g     | General   | Go to line                                 | 'goto-line                                            |
-| C-w         | General   | Kill the last word                         | 'backward-kill-word                                   |
-| C-c n       | General   | Show file name + path, save to clipboard   | 'my-show-file-name                                    |
-| <f6>        | Buffers   | Kill current buffer                        | (lambda () (interactive) (kill-buffer (buffer-name))) |
-| <f8>        | Buffers   | Switch to "other" buffer                   | (lambda () (interactive) (switch-to-buffer nil))      |
-| C-h C-d     | Directory | Open dired in current file location        | 'dired-jump                                           |
-| C-c s b     | Directory | Open the speedbar                          | 'speedbar                                             |
-| C-c T       | Directory | Open terminal in current directory         | (lambda () (interactive) (my-open-terminal nil))      |
-| C-c t       | Directory | Open terminal in current project root      | (lambda () (interactive) (my-open-terminal t))        |
-| C-h C-d     | Directory | Open dired in current file location        | 'dired-jump                                           |
-| C-S-c C-S-c | Editing   | Edit region with multiple cursors          | 'mc/edit-lines                                        |
-| C-<         | Editing   | Multiple cursors up                        | 'mc/mark-previous-like-this                           |
-| C->         | Editing   | Multiple cursors down                      | 'mc/mark-next-like-this                               |
-| C-*         | Editing   | Mark all like "this" with multiple cursors | 'mc/mark-all-like-this                                |
-| C-h TAB     | Editing   | Indent the whole buffer                    | 'my-indent-whole-buffer                               |
-| M-9         | Windows   | Switch to the minibuffer                   | 'my-switch-to-minibuffer-window                       |
-| <M-up>      | Windows   | Move the current buffer window up          | 'buf-move-up                                          |
-| <M-down>    | Windows   | Move the current buffer window down        | 'buf-move-down                                        |
-| <M-left>    | Windows   | Move the current buffer window left        | 'buf-move-left                                        |
-| <M-right>   | Windows   | Move the current buffer window right       | 'buf-move-right                                       |
-| C-c l n     | Interface | Show/hide the line numbers                 | 'linum-mode                                           |
+| Combo             | Category  | Desciption                                          | Command                                               |
+|-------------------+-----------+-----------------------------------------------------+-------------------------------------------------------|
+| C-x C-k           | General   | Kill emacs                                          | 'kill-region                                          |
+| C-c C-k           | General   | Kill emacs                                          | 'kill-region                                          |
+| C-x C-g           | General   | Go to line                                          | 'goto-line                                            |
+| C-c C-g           | General   | Go to line                                          | 'goto-line                                            |
+| C-w               | General   | Kill the last word                                  | 'backward-kill-word                                   |
+| C-c n             | General   | Show file name + path, save to clipboard            | 'my-show-file-name                                    |
+| M-x               | General   | Helm M-x (execute command)                          | 'helm-M-x                                             |
+| C-h C-h           | General   | Helm M-x (execute command)                          | 'helm-M-x                                             |
+| C-h h             | General   | Helm navigate project files                         | 'helm-projectile                                      |
+| <C-S-iso-lefttab> | General   | Helm for files                                      | 'helm-for-files                                       |
+| C-h ,             | General   | Helm: find commands, functions, variables and faces | 'helm-apropos                                         |
+| C-h .             | General   | Helm: Emacs info manual                             | 'helm-info-emacs                                      |
+| C-h 4             | General   | Helm: Elisp info manual                             | 'helm-info-elisp                                      |
+| C-h 3             | General   | Helm: Locate an Elisp library                       | 'helm-locate-library                                  |
+| <f6>              | Buffers   | Kill current buffer                                 | (lambda () (interactive) (kill-buffer (buffer-name))) |
+| <f8>              | Buffers   | Switch to "other" buffer                            | (lambda () (interactive) (switch-to-buffer nil))      |
+| C-h C-SPC         | History   | Helm show the kill ring                             | 'helm-show-kill-ring                                  |
+| C-h SPC           | History   | Helm show all mark rings                            | 'helm-all-mark-rings                                  |
+| C-h C-d           | Directory | Open dired in current file location                 | 'dired-jump                                           |
+| C-c s b           | Directory | Open the speedbar                                   | 'speedbar                                             |
+| C-c T             | Directory | Open terminal in current directory                  | (lambda () (interactive) (my-open-terminal nil))      |
+| C-c t             | Directory | Open terminal in current project root               | (lambda () (interactive) (my-open-terminal t))        |
+| C-h C-d           | Directory | Open dired in current file location                 | 'dired-jump                                           |
+| C-S-c C-S-c       | Editing   | Edit region with multiple cursors                   | 'mc/edit-lines                                        |
+| C-<               | Editing   | Multiple cursors up                                 | 'mc/mark-previous-like-this                           |
+| C->               | Editing   | Multiple cursors down                               | 'mc/mark-next-like-this                               |
+| C-*               | Editing   | Mark all like "this" with multiple cursors          | 'mc/mark-all-like-this                                |
+| C-h TAB           | Editing   | Indent the whole buffer                             | 'my-indent-whole-buffer                               |
+| M-9               | Windows   | Switch to the minibuffer                            | 'my-switch-to-minibuffer-window                       |
+| <M-up>            | Windows   | Move the current buffer window up                   | 'buf-move-up                                          |
+| <M-down>          | Windows   | Move the current buffer window down                 | 'buf-move-down                                        |
+| <M-left>          | Windows   | Move the current buffer window left                 | 'buf-move-left                                        |
+| <M-right>         | Windows   | Move the current buffer window right                | 'buf-move-right                                       |
+| C-h C-l           | Find/Grep | Helm locate                                         | 'helm-locate                                          |
+| C-h C-z           | Find/Grep | Projectile find file                                | 'projectile-find-file                                 |
+| C-h G             | Find/Grep | Projectile grep                                     | 'projectile-grep                                      |
+| C-c l n           | Interface | Show/hide the line numbers                          | 'linum-mode                                           |
 
 
 ** Settings
-*** Always Maximize
-
-#+BEGIN_SRC emacs-lisp
-(modify-all-frames-parameters '((fullscreen . maximized)))
-#+END_SRC
-
-Maximize and full frame all emacs
 
 *** General Settings
 
@@ -226,17 +232,6 @@ Loading my very own [[https://github.com/steckerhalter/grandshell-theme][Grand S
 
 Inconsolata is my favorite font!
 
-*** Frame title
-
-#+BEGIN_SRC emacs-lisp
-(setq frame-title-format
-      '(buffer-file-name
-        "%f"
-        (dired-directory dired-directory "%b")))
-#+END_SRC
-
-Set the full path on the frame.
-
 
 ** Custom Functions
 *** my-indent-whole-buffer
@@ -317,6 +312,19 @@ Cleanup white spaces before saving.
 (quelpa '(buffer-move :fetcher wiki))
 #+END_SRC
 
+*** bookmarks+
+#+BEGIN_QUOTE
+Bookmark+: extensions to standard library `bookmark.el'.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+  (quelpa
+   '(bookmark+ :fetcher wiki :files
+               ("bookmark+.el" "bookmark+-mac.el" "bookmark+-bmu.el"
+                "bookmark+-1.el" "bookmark+-key.el" "bookmark+-lit.el"
+                "bookmark+-doc.el" "bookmark+-chg.el")))
+#+END_SRC
+
 *** company
 #+BEGIN_QUOTE
 Company stands for "complete anything". It uses pluggable back-ends
@@ -346,7 +354,7 @@ http://company-mode.github.io/images/company-semantic.png
 (setq company-backends (remove 'company-ropemacs company-backends))
 #+END_SRC
 
-Similar to auto-complete mode.
+Trying company instead of auto-complete mode.
 
 #+BEGIN_SRC emacs-lisp
 (defun my-pcomplete-capf ()
@@ -437,23 +445,56 @@ The Helm source code can be found [[https://github.com/emacs-helm/helm][at Githu
 Ref. [[https://github.com/emacs-helm/helm/wiki][Helm Wiki]] for detailed instructions on how Helm works.
 
 #+BEGIN_SRC emacs-lisp
-(quelpa '(helm :repo "emacs-helm/helm" :fetcher github :files ("*.el" "emacs-helm.sh")))
-(quelpa '(helm-descbinds :repo "emacs-helm/helm-descbinds" :fetcher github))
-(quelpa '(helm-gtags :repo "syohex/emacs-helm-gtags" :fetcher github :files ("helm-gtags.el")))
-(quelpa '(helm-projectile :repo "bbatsov/projectile" :fetcher github :files ("helm-projectile.el")))
-(require 'helm-config)
-(setq helm-mode-handle-completion-in-region nil) ; don't use helm for `completion-at-point'
-(helm-mode 1)
-(helm-gtags-mode 1)
-(helm-descbinds-mode)
-(setq helm-idle-delay 0.1)
-(setq helm-input-idle-delay 0.1)
-(setq helm-buffer-max-length 50)
-(setq helm-M-x-always-save-history t)
-(setq helm-buffer-details-flag nil)
-(add-to-list 'helm-completing-read-handlers-alist '(org-refile)) ; helm-mode does not do org-refile well
-(add-to-list 'helm-completing-read-handlers-alist '(org-agenda-refile)) ; same goes for org-agenda-refile
+    (quelpa '(helm :repo "emacs-helm/helm"
+                   :fetcher github :files ("*.el" "emacs-helm.sh")))
+    (quelpa '(helm-descbinds :repo "emacs-helm/helm-descbinds" :fetcher github))
+    (quelpa '(helm-gtags :repo "syohex/emacs-helm-gtags" :fetcher github
+                         :files ("helm-gtags.el")))
+    (quelpa '(helm-projectile :repo "bbatsov/projectile"
+                              :fetcher github :files ("helm-projectile.el")))
+    (setq helm-gtags-ignore-case t
+          helm-gtags-auto-update t
+          helm-gtags-prefix-key "\C-cg"
+          )
+    (require 'helm-config)
+    (setq helm-mode-handle-completion-in-region
+          nil) ; don't use helm for `completion-at-point'
+    (helm-mode 1)
+    (helm-gtags-mode 1)
+    (helm-descbinds-mode)
+    (setq helm-idle-delay 0.1
+          helm-input-idle-delay 0.1
+          helm-buffer-max-length 50
+          helm-M-x-always-save-history t
+          helm-buffer-details-flag nil
+          )
+    (add-to-list 'helm-completing-read-handlers-alist
+                 '(org-refile)) ; helm-mode does not do org-refile well
+    (add-to-list 'helm-completing-read-handlers-alist
+                 '(org-agenda-refile)) ; same goes for org-agenda-refile
+    (add-hook 'dired-mode-hook 'helm-gtags-mode)
+    (add-hook 'c-mode-hook 'helm-gtags-mode)
+    (add-hook 'c++-mode-hook 'helm-gtags-mode)
+
+    (define-key helm-gtags-mode-map (kbd "C-c g a")
+      'helm-gtags-tags-in-this-function)
+    (define-key helm-gtags-mode-map (kbd "C-c g r")
+      'helm-gtags-find-rtag)
+    (define-key helm-gtags-mode-map (kbd "M-s")
+      'helm-gtags-select)
+    (define-key helm-gtags-mode-map (kbd "M-.")
+      'helm-gtags-dwim)
+    (define-key helm-gtags-mode-map (kbd "M-,")
+      'helm-gtags-pop-stack)
+
+    (define-key helm-gtags-mode-map (kbd "C-c <")
+      'helm-gtags-previous-history)
+    (define-key helm-gtags-mode-map (kbd "C-c >")
+      'helm-gtags-next-history)
 #+END_SRC
+
+Many of the gtags setup is taken from
+http://tuhdo.github.io/c-ide.html
 
 *** helm-swoop
 
@@ -645,6 +686,19 @@ Github: https://github.com/Bruce-Connor/smart-mode-line
 #+END_SRC
 
 Show the encoding and add VC information to the mode-line.
+
+*** sr-speedbar
+#+BEGIN_QUOTE
+The sr-speedbar.el was created just because I could not believe what I
+read on http://www.emacswiki.org/cgi-bin/wiki/Speedbar.  They wrote there
+that it is not possible to show the speedbar in the same frame.  But, as
+we all know, ecb had this already.  So I started as some kind of joke :)
+But when I found it useful and use it all the time.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(quelpa '(sr-speedbar :fetcher wiki))
+#+END_SRC
 
 *** vlf
 #+BEGIN_QUOTE
@@ -1054,6 +1108,13 @@ Enable markdown-mode when the file suffixes match.
 
 
 * Programming
+*** c/c++
+#+BEGIN_SRC emacs-lisp
+(setq company-backends (delete 'company-semantic company-backends))
+;;(define-key c-mode-map  [(tab)] 'company-complete)
+;;(define-key c++-mode-map  [(tab)] 'company-complete)
+#+END_SRC
+
 *** cider
 
 #+BEGIN_QUOTE
@@ -1075,6 +1136,17 @@ Github: https://github.com/clojure-emacs/cider
 #+END_SRC
 
 Don't popup nasty stacktraces all over the place, please.
+
+*** ess
+#+BEGIN_SRC emacs-lisp
+(quelpa '(ess :repo "emacs-ess/ESS" :fetcher github :files
+           ("*.el" ("lisp" "lisp/*.el") ("etc" "etc/*")
+            "doc/*.texi" "doc/info/dir")))
+
+(require 'ess-site)
+#+END_SRC
+
+Emacs speaks statistics, an interface to R
 
 *** diff-hl
 #+BEGIN_QUOTE
@@ -1218,20 +1290,18 @@ Github: https://github.com/Fuco1/smartparens
    - Prelude uses Anaconda
      https://github.com/srirampc/prelude/blob/master/modules/prelude-python.el
    - Jedi
-2. R ess
-   - https://github.com/emacs-ess/ESS
 3. C/C++
-   - clang completion
+   - clang completion (something wrong here)
 4. Other packages from emacs live
-   - Do it
+   - Must have
      - yasnippet (org mode config)
      - wc-mode
      - git-gutter (configure for hg too)
-   - May be
+   - Good to have
      - ace jump
      - highlight tail
      - smex vs. helm
-5. Automatic removal of end of line spaces
+5. +Automatic removal of end of line spaces+
 6. Automatic wrap at 80 characters
 7. key bindings
 8. Explore company mode
