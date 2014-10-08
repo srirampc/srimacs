@@ -170,12 +170,15 @@ Also Emacs should be able to kill processes without asking which is achieved in 
 *** Default Settings
 
 #+BEGIN_SRC emacs-lisp
+(require 'uniquify)
 (setq-default
  tab-width 4
  indent-tabs-mode nil                   ;use spaces instead of tabs
  c-basic-offset 4                       ;"tab" with in c-related modes
  c-hungry-delete-key t                  ;delete more than one space
  fill-column 72
+ uniquify-buffer-name-style 'post-forward
+ uniquify-separator ":"
  )
 #+END_SRC
 
@@ -187,7 +190,9 @@ tab-width is a variable defined in `C source code'.
 Automatically becomes buffer-local when set.
 #+END_QUOTE
 
-Whenever they are set the value becomes buffer-local. To be able to set such a variable globally we have to use =setq-default= which modifies the default value of the variable.
+Whenever they are set the value becomes buffer-local. To be able to set
+such a variable globally we have to use =setq-default= which modifies
+the default value of the variable.
 
 *** Global Modes
 
@@ -1291,17 +1296,17 @@ Github: https://github.com/Fuco1/smartparens
      https://github.com/srirampc/prelude/blob/master/modules/prelude-python.el
    - Jedi
 3. C/C++
-   - clang completion (something wrong here)
+   - +clang completion+ (mostly works for now)
 4. Other packages from emacs live
    - Must have
      - yasnippet (org mode config)
      - wc-mode
-     - git-gutter (configure for hg too)
    - Good to have
      - ace jump
      - highlight tail
      - smex vs. helm
+     - git-gutter (configure for hg too)
 5. +Automatic removal of end of line spaces+
-6. Automatic wrap at 80 characters
+6. Automatic wrap at 80 characters (Not required for now)
 7. key bindings
-8. Explore company mode
+8. Explore company mode and helm
