@@ -25,14 +25,13 @@
 (add-to-list 'load-path (getenv "HOME"))
 (require 'cygwin-mount)
 (cygwin-mount-activate)
+;; exec-path to go first
 (add-to-list 'exec-path "C:/cygwin64/bin")
 (add-to-list 'exec-path "C:/Program Files/R/R-3.0.2/bin")
 (add-to-list 'exec-path "C:/Program Files/R/R-3.0.2/bin/x64")
 (add-to-list 'exec-path "C:/apps/Python27")
-(add-to-list 'exec-path "C:/apps/tar")
-(setq pymacs-load-path (cons "c:/apps/Pymacs" nil))
-(setq live-root-dir "C:/dot-emacs/emacs-live")
-;;(load "C:/dot-emacs/emacs-live/init.el")
+(add-to-list 'exec-path "C:/PROGRA~2/Git/bin/")
+;; entry to the new
 (load "C:/dot-emacs/srimacs/init.el")
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
