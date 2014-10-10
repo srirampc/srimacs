@@ -1312,6 +1312,25 @@ Committing should act like =git commit -a= by default.
 
 Show whitespace errors in all programming modes by turning on =show-trailing-whitespace= in these modes.
 *** python
+#+begin_quote
+Elpy is an Emacs package to bring powerful Python editing to Emacs.
+It combines a number of existing Emacs packages, and uses one of a
+selection of Python packages for code introspection.
+#+end_quote
+
+#+begin_src emacs-lisp :tangle yes
+  (quelpa '(elpy
+            :fetcher github
+            :repo "jorgenschaefer/elpy"
+            :branch "release"
+            :files ("elpy.el"
+                    "elpy-refactor.el"
+                    "elpy-pkg.el.in"
+                    "snippets"
+                    "elpy")))
+  (elpy-enable)
+#+end_src
+
 *** smartparens
 
 #+BEGIN_QUOTE

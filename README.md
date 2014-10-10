@@ -3,22 +3,38 @@ This is my emacs customization organized as a set of org files.
 ## Installation Notes
 The following are pre-requesites :
 
-0. In Windows/Mac OS X, install cygwin/brew
+0. In Windows and Mac OS, install cygwin and brew respectively.
 1. Pre-requesites on all systems
-2. Pre-requesites on windows/cygwin (see the specific .emacs file)
-   - openssl
-   - gnutls
-   - tar
-   - make
+   - git
+   - Mercurial
    - python
+   - R
    - GNU global
-3. Pre-requesites on mac/brew (TODO:: update)
-   - GNU global
-4. Pre-requesites on GNU/linux (TODO:: update)
-   -
-5. Install the latest version of org-mode using package-install
+2. Pre-requesites on windows/cygwin (see the specific .emacs file)
+   - git should be installed outside of cygwin
+   - cygwin
+   ```
+      openssl
+      gnutls
+      tar
+      find
+      grep
+      make
+      perl
+      (others : update as required)
+   ```
+3. Pre-requesites on Mac and GNU/linux
+   - openssh
+   - (others : update as required)
+4. Python dependecies
+   - Python 2.7
+   - Rope
+   - Synatx checker pyflakes and Also, pip install flake8
+5. R dependencies
+   - R version 3 or above
+6. Install the latest version of org-mode using package-install
     package-install RET org RET
-6. Edit .emacs as given the dot-emacs-OS
+7. Replace .emacs with dot-emacs-OS.el and edit as required.
 
 ## Issues
 1. Disabled upgrade on initialization because of the following patch
@@ -61,4 +77,15 @@ The following are pre-requesites :
              "--exclude=.bzr"
              "--exclude=.hg"
              (or (mapcar (lambda (fn) (concat dir "/" fn)) files) (list dir))))
+```
+  Note that the above fix doesn't work with Mac OS X. Hence a manual tweaking
+  is necessary.
+2. In the same file, package-build-default-files-spec is updated to avoid throwing away *-test files. This was causing trouble with cider, which "cider-test.el" as a part of the package itself.
+```
+(defconst package-build-default-files-spec
+  '("*.el" "*.el.in" "dir"
+    "*.info" "*.texi" "*.texinfo"
+    "doc/dir" "doc/*.info" "doc/*.texi" "doc/*.texinfo"
+    (:exclude ".dir-locals.el"))
+  "Default value for :files attribute in recipes.")
 ```
