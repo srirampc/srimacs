@@ -163,9 +163,13 @@ a bit of Elisp code =gen-keys= and is spit out inside a code block via
          kill-buffer-query-functions))
 #+END_SRC
 
-All "yes" or "no" questions are aliased to "y" or "n". We don't really want to type a full word to answer a question from Emacs, yet Emacs imposes that silly behavior on us. No!
+All "yes" or "no" questions are aliased to "y" or "n". We don't really
+want to type a full word to answer a question from Emacs, yet Emacs
+imposes that silly behavior on us. No!
 
-Also Emacs should be able to kill processes without asking which is achieved in the second expression. Got that snippet from: http://www.masteringemacs.org/articles/2010/11/14/disabling-prompts-emacs/
+Also Emacs should be able to kill processes without asking which is
+achieved in the second expression. Got that snippet from:
+http://www.masteringemacs.org/articles/2010/11/14/disabling-prompts-emacs/
 
 *** Default Settings
 
@@ -187,7 +191,9 @@ tab-width is a variable defined in `C source code'.
 Automatically becomes buffer-local when set.
 #+END_QUOTE
 
-Whenever they are set the value becomes buffer-local. To be able to set such a variable globally we have to use =setq-default= which modifies the default value of the variable.
+Whenever they are set the value becomes buffer-local. To be able to set
+such a variable globally we have to use =setq-default= which modifies
+the default value of the variable.
 
 *** Global Modes
 
@@ -1110,7 +1116,7 @@ Enable markdown-mode when the file suffixes match.
 * Programming
 *** c/c++
 #+BEGIN_SRC emacs-lisp
-(setq company-backends (delete 'company-semantic company-backends))
+;;(setq company-backends (delete 'company-semantic company-backends))
 ;;(define-key c-mode-map  [(tab)] 'company-complete)
 ;;(define-key c++-mode-map  [(tab)] 'company-complete)
 #+END_SRC
