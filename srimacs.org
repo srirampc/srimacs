@@ -87,8 +87,8 @@ a bit of Elisp code =gen-keys= and is spit out inside a code block via
 #+TBLNAME: keys
 | Combo             | Category  | Desciption                                          | Command                                               |
 |-------------------+-----------+-----------------------------------------------------+-------------------------------------------------------|
-| C-x C-k           | General   | Kill emacs                                          | 'kill-region                                          |
-| C-c C-k           | General   | Kill emacs                                          | 'kill-region                                          |
+| C-x C-k           | General   | Kill selected region                                | 'kill-region                                          |
+| C-c C-k           | General   | Kill selected region                                | 'kill-region                                          |
 | C-x C-g           | General   | Go to line                                          | 'goto-line                                            |
 | C-c C-g           | General   | Go to line                                          | 'goto-line                                            |
 | C-w               | General   | Kill the last word                                  | 'backward-kill-word                                   |
@@ -123,6 +123,7 @@ a bit of Elisp code =gen-keys= and is spit out inside a code block via
 | C-h C-l           | Find/Grep | Helm locate                                         | 'helm-locate                                          |
 | C-h C-z           | Find/Grep | Projectile find file                                | 'projectile-find-file                                 |
 | C-h G             | Find/Grep | Projectile grep                                     | 'projectile-grep                                      |
+| C-x SPC           | Find/Grep | Ace Jump Mode                                       | 'ace-jump-mode                                        |
 | C-c l n           | Interface | Show/hide the line numbers                          | 'linum-mode                                           |
 
 
@@ -174,12 +175,15 @@ http://www.masteringemacs.org/articles/2010/11/14/disabling-prompts-emacs/
 *** Default Settings
 
 #+BEGIN_SRC emacs-lisp
+(require 'uniquify)
 (setq-default
  tab-width 4
  indent-tabs-mode nil                   ;use spaces instead of tabs
  c-basic-offset 4                       ;"tab" with in c-related modes
  c-hungry-delete-key t                  ;delete more than one space
  fill-column 72
+ uniquify-buffer-name-style 'post-forward
+ uniquify-separator ":"
  )
 #+END_SRC
 
@@ -312,6 +316,21 @@ general to also work with other completion functions.
 Cleanup white spaces before saving.
 
 * Power Tools
+*** ace-jump-mode
+
+#+begin_quote
+ace-jump-mode is an fast/direct cursor location minor mode. It will
+create the N-Branch search tree internal and marks all the possible
+position with predefined keys in within the whole emacs view.
+Allowing you to move to the character/word/line almost directly.
+#+end_quote
+
+#+begin_src emacs-lisp
+  (quelpa '(ace-jump-mode
+            :repo "winterTTr/ace-jump-mode"
+            :fetcher github))
+#+end_src
+
 *** buffer-move
 
 #+BEGIN_SRC emacs-lisp
@@ -451,52 +470,52 @@ The Helm source code can be found [[https://github.com/emacs-helm/helm][at Githu
 Ref. [[https://github.com/emacs-helm/helm/wiki][Helm Wiki]] for detailed instructions on how Helm works.
 
 #+BEGIN_SRC emacs-lisp
-    (quelpa '(helm :repo "emacs-helm/helm"
-                   :fetcher github :files ("*.el" "emacs-helm.sh")))
-    (quelpa '(helm-descbinds :repo "emacs-helm/helm-descbinds" :fetcher github))
-    (quelpa '(helm-gtags :repo "syohex/emacs-helm-gtags" :fetcher github
-                         :files ("helm-gtags.el")))
-    (quelpa '(helm-projectile :repo "bbatsov/projectile"
-                              :fetcher github :files ("helm-projectile.el")))
-    (setq helm-gtags-ignore-case t
-          helm-gtags-auto-update t
-          helm-gtags-prefix-key "\C-cg"
-          )
-    (require 'helm-config)
-    (setq helm-mode-handle-completion-in-region
-          nil) ; don't use helm for `completion-at-point'
-    (helm-mode 1)
-    (helm-gtags-mode 1)
-    (helm-descbinds-mode)
-    (setq helm-idle-delay 0.1
-          helm-input-idle-delay 0.1
-          helm-buffer-max-length 50
-          helm-M-x-always-save-history t
-          helm-buffer-details-flag nil
-          )
-    (add-to-list 'helm-completing-read-handlers-alist
-                 '(org-refile)) ; helm-mode does not do org-refile well
-    (add-to-list 'helm-completing-read-handlers-alist
-                 '(org-agenda-refile)) ; same goes for org-agenda-refile
-    (add-hook 'dired-mode-hook 'helm-gtags-mode)
-    (add-hook 'c-mode-hook 'helm-gtags-mode)
-    (add-hook 'c++-mode-hook 'helm-gtags-mode)
+  (quelpa '(helm :repo "emacs-helm/helm"
+                 :fetcher github :files ("*.el" "emacs-helm.sh")))
+  (quelpa '(helm-descbinds :repo "emacs-helm/helm-descbinds" :fetcher github))
+  (quelpa '(helm-gtags :repo "syohex/emacs-helm-gtags" :fetcher github
+                       :files ("helm-gtags.el")))
+  (quelpa '(helm-projectile :repo "bbatsov/projectile"
+                            :fetcher github :files ("helm-projectile.el")))
+  (setq helm-gtags-ignore-case t
+        helm-gtags-auto-update t
+        helm-gtags-prefix-key "\C-cg"
+        )
+  (require 'helm-config)
+  (setq helm-mode-handle-completion-in-region
+        nil) ; don't use helm for `completion-at-point'
+  (helm-mode 1)
+  (helm-gtags-mode 1)
+  (helm-descbinds-mode)
+  (setq helm-idle-delay 0.1
+        helm-input-idle-delay 0.1
+        helm-buffer-max-length 50
+        helm-M-x-always-save-history t
+        helm-buffer-details-flag nil
+        )
+  (add-to-list 'helm-completing-read-handlers-alist
+               '(org-refile)) ; helm-mode does not do org-refile well
+  (add-to-list 'helm-completing-read-handlers-alist
+               '(org-agenda-refile)) ; same goes for org-agenda-refile
+  (add-hook 'dired-mode-hook 'helm-gtags-mode)
+  (add-hook 'c-mode-hook 'helm-gtags-mode)
+  (add-hook 'c++-mode-hook 'helm-gtags-mode)
 
-    (define-key helm-gtags-mode-map (kbd "C-c g a")
-      'helm-gtags-tags-in-this-function)
-    (define-key helm-gtags-mode-map (kbd "C-c g r")
-      'helm-gtags-find-rtag)
-    (define-key helm-gtags-mode-map (kbd "M-s")
-      'helm-gtags-select)
-    (define-key helm-gtags-mode-map (kbd "M-.")
-      'helm-gtags-dwim)
-    (define-key helm-gtags-mode-map (kbd "M-,")
-      'helm-gtags-pop-stack)
+  (define-key helm-gtags-mode-map (kbd "C-c g a")
+    'helm-gtags-tags-in-this-function)
+  (define-key helm-gtags-mode-map (kbd "C-c g r")
+    'helm-gtags-find-rtag)
+  (define-key helm-gtags-mode-map (kbd "M-s")
+    'helm-gtags-select)
+  (define-key helm-gtags-mode-map (kbd "M-.")
+    'helm-gtags-dwim)
+  (define-key helm-gtags-mode-map (kbd "M-,")
+    'helm-gtags-pop-stack)
 
-    (define-key helm-gtags-mode-map (kbd "C-c <")
-      'helm-gtags-previous-history)
-    (define-key helm-gtags-mode-map (kbd "C-c >")
-      'helm-gtags-next-history)
+  (define-key helm-gtags-mode-map (kbd "C-c <")
+    'helm-gtags-previous-history)
+  (define-key helm-gtags-mode-map (kbd "C-c >")
+    'helm-gtags-next-history)
 #+END_SRC
 
 Many of the gtags setup is taken from
@@ -674,21 +693,29 @@ Github: https://github.com/DamienCassou/shell-switcher
 *** smart-mode-line
 
 #+BEGIN_QUOTE
-Smart Mode Line is a sexy mode-line for Emacs, that aims to be easy to read from small to large monitors by using a prefix feature and smart truncation.
+Smart Mode Line is a sexy mode-line for Emacs, that aims to be easy to
+read from small to large monitors by using a prefix feature and smart
+truncation.
 #+END_QUOTE
 
 https://raw.github.com/Bruce-Connor/smart-mode-line/master/screenshot-2013-11-11-dark.png
 
-It is written by Artur Bruce-Connor. The default Emacs mode-line has some shortcomings and =sml= does a good job at improving it.
+It is written by Artur Bruce-Connor. The default Emacs mode-line has
+some shortcomings and =sml= does a good job at improving it.
 
 Github: https://github.com/Bruce-Connor/smart-mode-line
 
 #+BEGIN_SRC emacs-lisp
 (quelpa '(smart-mode-line :repo "Bruce-Connor/smart-mode-line" :fetcher github))
+(quelpa
+ '(smart-mode-line-powerline-theme :repo "Bruce-Connor/smart-mode-line"
+                                   :fetcher github
+                                   :files ("themes/smart-mode-line-powerline-theme.el")))
 (setq sml/vc-mode-show-backend t)
 (setq sml/no-confirm-load-theme t)
 (sml/setup)
 (sml/apply-theme 'respectful)
+;;(sml/apply-theme 'powerline)
 #+END_SRC
 
 Show the encoding and add VC information to the mode-line.
@@ -720,6 +747,22 @@ Github: https://github.com/m00natic/vlfi
 (require 'vlf-integrate)                ; just do it for real
 #+END_SRC
 
+*** yasnippet
+#+begin_quote
+YASnippet is a template system for Emacs. It allows you to type an
+abbreviation and automatically expand it into function
+templates. Bundled language templates include: C, C++, C#, Perl, Python,
+Ruby, SQL, LaTeX, HTML, CSS and more. The snippet syntax is inspired
+from TextMate's syntax, you can even import most TextMate templates to
+YASnippet.
+#+end_quote
+
+#+begin_src emacs-lisp
+  (quelpa '(yasnippet :repo "capitaomorte/yasnippet"
+                      :fetcher github
+                      :files ("yasnippet.el" "snippets")))
+  (yas-global-mode 1)
+#+end_src
 * Writing
 *** auctex-mode
 
@@ -1289,25 +1332,30 @@ Github: https://github.com/Fuco1/smartparens
 (custom-set-faces '(sp-pair-overlay-face ((t ()))))
 #+END_SRC
 
-* TODO
-1. python
+* Thoughts/Wishes etc.
+
+1. [ ] python with the following options
    - Simple :
      https://github.com/eschulte/emacs24-starter-kit/blob/master/starter-kit-python.org
    - Prelude uses Anaconda
      https://github.com/srirampc/prelude/blob/master/modules/prelude-python.el
    - Jedi
-3. C/C++
-   - clang completion (something wrong here)
-4. Other packages from emacs live
+     https://github.com/tkf/emacs-jedi
+   - elpy (leaning toward this!)
+     https://github.com/jorgenschaefer/elpy
+3. [X] +ESS/R+
+4. [X] C/C++
+   - +clang completion+ (mostly works for now)
+5. [ ] Other packages from emacs live
    - Must have
-     - yasnippet (org mode config)
-     - wc-mode
-     - git-gutter (configure for hg too)
+     - [X] +yasnippet (org mode config)+
    - Good to have
-     - ace jump
-     - highlight tail
-     - smex vs. helm
-5. +Automatic removal of end of line spaces+
-6. Automatic wrap at 80 characters
-7. key bindings
-8. Explore company mode
+     - [X] +ace jump+
+     - [ ] smex vs. helm (revisit later)
+     - [ ] git-gutter (configure for hg too)
+     - +highlight tail+ (not needed)
+     - [ ] wc-mode
+6. [X] +Automatic removal of end of line spaces+
+7. [X] +Automatic wrap at 80 characters+ (Not required for now)
+8. [ ] Key bindings revision.
+9. [ ] Company mode and helm learning curve.
