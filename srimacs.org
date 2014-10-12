@@ -1155,7 +1155,6 @@ memoir article with the default pdflatex.
 
 Enable markdown-mode when the file suffixes match.
 
-
 * Programming
 *** c/c++
 #+BEGIN_SRC emacs-lisp
@@ -1353,14 +1352,14 @@ Github: https://github.com/Fuco1/smartparens
 
 * Thoughts/Wishes etc.
 
-1. [ ] python with the following options
-   - Simple :
+1. [X] python with the following options
+   - Simple with no packages:
      https://github.com/eschulte/emacs24-starter-kit/blob/master/starter-kit-python.org
    - Prelude uses Anaconda
      https://github.com/srirampc/prelude/blob/master/modules/prelude-python.el
    - Jedi
      https://github.com/tkf/emacs-jedi
-   - elpy (leaning toward this!)
+   - [X] elpy (leaning toward this!)
      https://github.com/jorgenschaefer/elpy
 3. [X] +ESS/R+
 4. [X] C/C++
