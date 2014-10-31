@@ -8,7 +8,6 @@
 (require 'ob-tangle)
 
 ;; load other files from the `after-init-hook' so all packages are loaded
-
 ;; load the starter kit from the `after-init-hook' so all packages are loaded
 (add-hook 'after-init-hook
  `(lambda ()
