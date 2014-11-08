@@ -655,26 +655,6 @@ where it was when you previously visited the same file.
 (require 'saveplace)
 (setq-default save-place t)
 #+END_SRC
-*** savehist
-
-#+BEGIN_QUOTE
-Many editors (e.g. Vim) have the feature of saving minibuffer history
-to an external file after exit.  This package provides the same
-feature in Emacs. When set up, it saves recorded minibuffer histories
-to a file.
-#+END_QUOTE
-
-#+BEGIN_SRC emacs-lisp
-  (setq savehist-additional-variables
-        '(kill-ring mark-ring global-mark-ring
-          search-ring regexp-search-ring
-          extended-command-history)
-        ;; save every minute
-        savehist-autosave-interval 60)
-  (savehist-mode 1)
-#+END_SRC
-
-Add variables like the =extended-command-history= to persist.
 *** shell-switcher
 #+BEGIN_QUOTE
 An emacs minor mode to easily switch between shell buffers (like with alt+tab)
