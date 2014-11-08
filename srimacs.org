@@ -1158,9 +1158,13 @@ Enable markdown-mode when the file suffixes match.
 * Programming
 *** c/c++
 #+BEGIN_SRC emacs-lisp
-;;(setq company-backends (delete 'company-semantic company-backends))
-;;(define-key c-mode-map  [(tab)] 'company-complete)
-;;(define-key c++-mode-map  [(tab)] 'company-complete)
+  (quelpa '(company-c-headers :repo "randomphrase/company-c-headers" :fetcher github))
+
+  (setq company-backends (delete 'company-semantic company-backends))
+  (add-to-list 'company-backends 'company-c-headers)
+
+  ;;(define-key c-mode-map  [(tab)] 'company-complete)
+  ;;(define-key c++-mode-map  [(tab)] 'company-complete)
 #+END_SRC
 
 *** cider
@@ -1352,7 +1356,7 @@ Github: https://github.com/Fuco1/smartparens
 
 * Thoughts/Wishes etc.
 
-1. [X] python with the following options
+1. [X] +python+
    - Simple with no packages:
      https://github.com/eschulte/emacs24-starter-kit/blob/master/starter-kit-python.org
    - Prelude uses Anaconda
