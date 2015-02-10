@@ -1330,6 +1330,21 @@ Github: https://github.com/Fuco1/smartparens
 (custom-set-faces '(sp-pair-overlay-face ((t ()))))
 #+END_SRC
 
+*** scala-mode
+
+#+BEGIN_QUOTE:
+scala-mode2 is a new scala-mode for emacs. The mode intends to provide
+the basic emacs support, including indenting of code, comments and
+multi-line strings, motion commands, and highlighting
+#+END_QUOTE:
+
+#+BEGIN_SRC: emacs-lisp
+(quelpa '(scala-mode2
+          :repo "hvesalai/scala-mode2"
+          :fetcher github))
+(require 'scala-mode2)
+
+#+END_SRC:
 * Thoughts/Wishes etc.
 
 1. [X] python with the following options
