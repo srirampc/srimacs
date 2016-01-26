@@ -8,8 +8,8 @@
 ;; [[http://tuhdo.github.io/][tuhdo]] and many others.
 
 ;; comes with emacs 24.5
-;; (if (not (package-installed-p 'auctex))
-;;     (package-install 'auctex))
+(if (not (package-installed-p 'auctex))
+    (package-install 'auctex))
 
 ;; Remove the default GNU archives, because we use steckerhalter's =quelpa=.
 (setq package-archives nil)
@@ -463,13 +463,14 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
   :config
   (sml/setup)
   (sml/apply-theme 'respectful)
-  (use-package smart-mode-line-powerline-theme
-    :quelpa
-    (smart-mode-line-powerline-theme
-     :repo "Bruce-Connor/smart-mode-line"
-     :fetcher github
-     :files ("themes/smart-mode-line-powerline-theme.el")))
-  (sml/apply-theme 'powerline))
+  (when (display-graphic-p)
+    (use-package smart-mode-line-powerline-theme
+      :quelpa
+      (smart-mode-line-powerline-theme
+       :repo "Bruce-Connor/smart-mode-line"
+       :fetcher github
+       :files ("themes/smart-mode-line-powerline-theme.el")))
+    (sml/apply-theme 'powerline)))
 
 ;; Speed bar ?
 (use-package sr-speedbar
@@ -497,7 +498,8 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
   (yas-global-mode 1))
 
 
-(load "auctex")
+(if (package-installed-p 'auctex)
+  (load "auctex"))
 
 ;;
 ;; org mode : latex
@@ -885,11 +887,6 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
 ;; magit
 (use-package magit
   :quelpa
-  (magit :fetcher github
-                :repo "magit/magit"
-                :files ("magit.el" "magit-bisect.el" "magit-blame.el"
-                        "magit-key-mode.el" "magit-popup.el" "magit-wip.el"
-                        "magit.texi" "AUTHORS.md" "README.md"))
   :init
   (setq magit-save-some-buffers nil) ;don't ask to save buffers
   (setq magit-set-upstream-on-push t) ;ask to set upstream
@@ -939,11 +936,11 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
 
 
 ;;;; elec-pair
-;; Automatic parenthesis pairing
-;; (use-package elec-pair
-;;   :config
-;;   ;;auto pair brackets, parens etc.
-;;   (electric-pair-mode 1))
+;;; Automatic parenthesis pairing
+(use-package elec-pair
+  :config
+  ;;auto pair brackets, parens etc.
+  (electric-pair-mode 1))
 
 
 ;;;; Highlight-parentheses
