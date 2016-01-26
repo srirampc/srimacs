@@ -11,7 +11,7 @@
 (if (not (package-installed-p 'auctex))
     (package-install 'auctex))
 
-;; Remove the default GNU archives, because we use steckerhalter's =quelpa=.
+;; Remove the default GNU archives, because we use =quelpa=.
 (setq package-archives nil)
 
 ;; quelpa
@@ -26,6 +26,9 @@
 ;; see https://github.com/jwiegley/use-package
 (quelpa '(quelpa-use-package :fetcher github :repo "quelpa/quelpa-use-package"))
 (require 'quelpa-use-package)
+
+;; Uncomment to upgrade
+;; (setq quelpa-upgrade-p t)
 
 ;; Key bindings
 (use-package bind-key
@@ -84,7 +87,6 @@
    ("<M-right>" . buf-move-right)
    ("C-h C-z" . projectile-find-file)
    ("C-h G" . projectile-grep)
-   ("C-x SPC" . ace-jump-mode)
    ("C-c l n" . linum-mode)
    ("C-h g" . grep-find)
    ("C-h C-o" . occur)))
@@ -131,13 +133,11 @@
   ;; Also Emacs should be able to kill processes without asking which is
   ;; achieved in the second expression. Got that snippet from:
   ;; http://www.masteringemacs.org/articles/2010/11/14/disabling-prompts-emacs/
-
   (defalias 'yes-or-no-p 'y-or-n-p)
 
   (provide 'srimacs-settings)
 
   :config
-
   (global-auto-revert-mode 1)  ;auto revert buffers when changed on disk
   (show-paren-mode t)          ;visualize()
   ;; (iswitchb-mode t)            ;use advanced tab switching
@@ -170,20 +170,26 @@
           (whitespace-cleanup))))
   (add-hook 'before-save-hook 'my-cleanup-whitespace))
 
+;;;; autorevert
+;; revert buffers when files on disk change
+(use-package autorevert
+  :config
+  ;; auto revert buffers when changed on disk
+  (global-auto-revert-mode 1))
+
 (when (display-graphic-p)
   ;; (use-package grandshell-theme
   ;;   :quelpa
-  ;;   (grandshell-theme :repo "steckerhalter/grandshell-theme" :fetcher github))
+  ;;   (grandshell-theme :repo "steckerhalter/grandshell-theme" :fetcher github)
+  ;;   :config
+  ;;   (load-theme 'grandshell t))
 
   (use-package solarized-theme
     :quelpa solarized-theme
     :config
-    (load-theme 'solarized-dark))
+    (load-theme 'solarized-dark)))
 
-  ;; (quelpa 'solarized-theme)
-  ;; (load-theme 'grandshell t)
-  )
-
+;; Show help on position
 (use-package pos-tip
   :quelpa (pos-tip
            :repo "syohex/pos-tip"
@@ -210,17 +216,21 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
     (lambda ()
       (interactive)
       (my-show-help))))
-;; (require 'pos-tip)
 
-
+;; jump based on character
 (use-package ace-jump-mode
   :quelpa (ace-jump-mode
            :repo "winterTTr/ace-jump-mode"
-           :fetcher github))
+           :fetcher github)
+  :bind
+  (("C-x SPC" . ace-jump-mode)
+   ("C-c SPC" . ace-jump-word-mode)))
 
+;;
 (use-package buffer-move
  :quelpa (buffer-move :fetcher wiki))
 
+;; book marks
 (use-package bookmark+
   :quelpa
   (bookmark+ :fetcher wiki :files
@@ -231,7 +241,6 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
 (use-package company
   :quelpa (company :repo "company-mode/company-mode" :fetcher github)
   :config
-  ;(require 'company)
   (setq
    company-idle-delay 0.3
    company-tooltip-limit 20
@@ -243,18 +252,16 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
   (add-to-list 'company-backends 'company-ispell t)
   (add-to-list 'company-backends 'company-files t)
   (setq company-backends (remove 'company-ropemacs company-backends))
-
   (defun my-pcomplete-capf ()
     (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
 
   (add-hook 'org-mode-hook #'my-pcomplete-capf)
-  (use-package company-c-header
+  (use-package company-c-headers
     :quelpa (company-c-headers :repo "randomphrase/company-c-headers" :fetcher github)
     :config
     (setq company-backends (delete 'company-semantic company-backends))
-    (add-to-list 'company-backends 'company-c-headers)))
-;;(define-key c-mode-map  [(tab)] 'company-complete)
-;;(define-key c++-mode-map  [(tab)] 'company-complete)
+    (add-to-list 'company-backends 'company-c-headers)
+    ))
 
 ;; (use-package dedicated
 ;;   :quelpa (dedicated :fetcher github :repo "emacsmirror/dedicated")
@@ -262,14 +269,11 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
 ;;   ; (require 'dedicated)
 ;;   )
 
-
 ;; Being in a dired buffer it is possible to make the buffer writable and
 ;; thus rename files and permissions by editing the buffer. Use =C-x C-q=
 ;; which runs the command =dired-toggle-read-only= to make that possible.
-
 ;; =dired-jump= (mapped to =C-h C-d=) jumps to Dired buffer corresponding to
 ;; current buffer.
-
 (use-package dired+
   :quelpa (dired+ :fetcher wiki)
   :config
@@ -285,7 +289,6 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
 
 ;; Many of the gtags setup is taken from
 ;; http://tuhdo.github.io/c-ide.html
-
 (use-package helm
   :quelpa
   (helm :repo "emacs-helm/helm"
@@ -376,6 +379,7 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
 
 ;(quelpa '(howdoi :repo "atykhonov/emacs-howdoi" :fetcher github))
 
+;;; ido
 (use-package ido
   :demand
   :init
@@ -396,12 +400,11 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
     :config
     (flx-ido-mode 1)))
 
+;; moving text up and down a line
 (use-package move-text
-  :quelpa (move-text :fetcher wiki)
-  ; :config
-  ; (require 'move-text)
-  )
+  :quelpa (move-text :fetcher wiki))
 
+;; multiple cusors - not sure i am using it much
 (use-package multiple-cursors
  :quelpa (multiple-cursors :fetcher github :repo "magnars/multiple-cursors.el"))
 
@@ -421,9 +424,7 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
    ("C-h C-p" . projectile-switch-project))
 
   :config
-  (projectile-global-mode 1)
-  )
-;(require 'projectile nil t)
+  (projectile-global-mode 1))
 
 ;; Keep track of recently opened files
 (use-package recentf
@@ -435,9 +436,8 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
 (use-package saveplace
   :config
   (setq-default save-place t))
-;(require 'saveplace)
-;(setq-default save-place t)
 
+;; Swich shells easily
 (use-package shell-switcher
   :quelpa
   (shell-switcher :fetcher github
@@ -446,8 +446,6 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
   :config
   (setq shell-switcher-new-shell-function 'shell-switcher-make-ansi-term)
   (setq shell-switcher-mode t))
-
-;(require 'shell-switcher)
 
 ;; Smart Line Mode is written by Artur Bruce-Connor. The default Emacs
 ;; mode-line has some shortcomings and =sml= does a good job at
@@ -462,7 +460,6 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
   (setq sml/no-confirm-load-theme t)
   :config
   (sml/setup)
-  (sml/apply-theme 'respectful)
   (when (display-graphic-p)
     (use-package smart-mode-line-powerline-theme
       :quelpa
@@ -470,9 +467,10 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
        :repo "Bruce-Connor/smart-mode-line"
        :fetcher github
        :files ("themes/smart-mode-line-powerline-theme.el")))
-    (sml/apply-theme 'powerline)))
+    (sml/apply-theme 'powerline))
+  (sml/apply-theme 'respectful))
 
-;; Speed bar ?
+;; Speed bar : Do i use it?
 (use-package sr-speedbar
   :quelpa
   (sr-speedbar :fetcher wiki))
@@ -826,6 +824,21 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
   :config
   (add-to-list 'auto-mode-alist '("\\.markdown\\'" . gfm-mode))
   (add-to-list 'auto-mode-alist '("\\.md\\'" . gfm-mode)))
+
+
+;; C/C++
+(use-package cmake-ide
+  :quelpa
+  :init
+  (cmake-ide-setup)
+  (defun my-c++-mode-hook ()
+    (define-key c++-mode-map  (kbd "C-c TAB") 'company-complete))
+  (add-hook 'c++-mode-hook 'my-c++-mode-hook)
+
+  (defun my-c-mode-hook ()
+    (define-key c-mode-map  (kbd "C-c TAB") 'company-complete))
+  (add-hook 'c-mode-hook 'my-c-mode-hook))
+
 
 ;; CIDER for Clojure
 (use-package cider
