@@ -37,7 +37,7 @@ Build and install your Emacs Lisp packages on-the-fly directly from source
 Github: [[https://github.com/quelpa/quelpa][quelpa]]
 
 #+BEGIN_SRC emacs-lisp
-(setq quelpa-update-melpa-p nil)
+;; (setq quelpa-update-melpa-p t)
 (if (require 'quelpa nil t)
     (quelpa '(quelpa :repo "quelpa/quelpa" :fetcher github) :upgrade nil)
   (with-temp-buffer
@@ -204,7 +204,7 @@ the default value of the variable.
 #+BEGIN_SRC emacs-lisp
 (global-auto-revert-mode 1)  ;auto revert buffers when changed on disk
 (show-paren-mode t)          ;visualize()
-(iswitchb-mode t)            ;use advanced tab switching
+;; (iswitchb-mode t)            ;use advanced tab switching
 (blink-cursor-mode -1)       ;no cursor blinking
 (tool-bar-mode -1)           ;disable the awful toolbar
 (menu-bar-mode -1)           ;no menu, you can toggle it with C-c m
@@ -686,16 +686,16 @@ some shortcomings and =sml= does a good job at improving it.
 Github: https://github.com/Bruce-Connor/smart-mode-line
 
 #+BEGIN_SRC emacs-lisp
-(quelpa '(smart-mode-line :repo "Bruce-Connor/smart-mode-line" :fetcher github))
-(quelpa
- '(smart-mode-line-powerline-theme :repo "Bruce-Connor/smart-mode-line"
-                                   :fetcher github
-                                   :files ("themes/smart-mode-line-powerline-theme.el")))
-(setq sml/vc-mode-show-backend t)
-(setq sml/no-confirm-load-theme t)
-(sml/setup)
-(sml/apply-theme 'respectful)
-;;(sml/apply-theme 'powerline)
+  (quelpa '(smart-mode-line :repo "Bruce-Connor/smart-mode-line" :fetcher github))
+  (quelpa
+   '(smart-mode-line-powerline-theme :repo "Bruce-Connor/smart-mode-line"
+                                     :fetcher github
+                                     :files ("themes/smart-mode-line-powerline-theme.el")))
+  (setq sml/vc-mode-show-backend t)
+  (setq sml/no-confirm-load-theme t)
+  (sml/setup)
+  (sml/apply-theme 'respectful)
+  ;;(sml/apply-theme 'powerline)
 #+END_SRC
 
 Show the encoding and add VC information to the mode-line.
@@ -1349,6 +1349,21 @@ multi-line strings, motion commands, and highlighting
 (require 'scala-mode2)
 
 #+END_SRC:
+*** rust mode
+#+BEGIN_QUOTE
+rust-mode: A major Emacs mode for editing Rust source code
+
+rust-mode makes editing Rust code with Emacs enjoyable
+#+END_QUOTE
+
+#+BEGIN_SRC: emacs-lisp
+(quelpa '(rust-mode
+          :repo "rust-lang/rust-mode"
+          :fetcher github))
+(require 'rust-mode)
+
+#+END_SRC:
+
 * Thoughts/Wishes etc.
 
 1. [X] +python+
