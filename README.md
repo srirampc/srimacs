@@ -1,8 +1,8 @@
 This is my emacs customization.  +Shamelessy Copied+ Heavily Inspired
-from [[https://github.com/steckerhalter/][steckerhalter]].  Uses code
-from [[https://github.com/overtone/emacs-live][emacs-live]],
-[[https://github.com/eschulte/emacs24-starter-kit][eschulte]],
-[[http://tuhdo.github.io/][tuhdo]] and many others.
+from [steckerhalter](https://github.com/steckerhalter/).  Uses code
+from [emacs-live](https://github.com/overtone/emacs-live),
+[eschulte](https://github.com/eschulte/emacs24-starter-kit),
+[tuhdo](http://tuhdo.github.io/) and many others.
 
 ## Installation Notes
 The following are pre-requesites :
