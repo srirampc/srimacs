@@ -1,4 +1,4 @@
-This is my emacs customization organized as a set of org files.
+This is my emacs customization.
 
 ## Installation Notes
 The following are pre-requesites :
@@ -32,9 +32,7 @@ The following are pre-requesites :
    - Synatx checker pyflakes and Also, pip install flake8
 5. R dependencies
    - R version 3 or above
-6. Install the latest version of org-mode using package-install
-    package-install RET org RET
-7. Replace .emacs with dot-emacs-OS.el and edit as required.
+6. Replace .emacs with dot-emacs-OS.el and edit as required.
 
 ## Issues
 1. Disabled upgrade on initialization because of the following patch
