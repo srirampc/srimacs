@@ -19,7 +19,7 @@
 (if (require 'quelpa nil t)
   (quelpa-self-upgrade)
   (with-temp-buffer
-    (url-insert-file-contents "https://raw.githubusercontent.com/srirampc/srimacs/master/bootstrap.el")
+    (url-insert-file-contents "https://raw.github.com/quelpa/quelpa/master/bootstrap.el")
     (eval-buffer)))
 
 ;; use-package with quelpa
@@ -170,17 +170,19 @@
           (whitespace-cleanup))))
   (add-hook 'before-save-hook 'my-cleanup-whitespace))
 
-;; (use-package grandshell-theme
-;;   :quelpa
-;;   (grandshell-theme :repo "steckerhalter/grandshell-theme" :fetcher github))
+(when (display-graphic-p)
+  ;; (use-package grandshell-theme
+  ;;   :quelpa
+  ;;   (grandshell-theme :repo "steckerhalter/grandshell-theme" :fetcher github))
 
-(use-package solarized-theme
-  :quelpa solarized-theme
-  :config
-  (load-theme 'solarized-dark))
+  (use-package solarized-theme
+    :quelpa solarized-theme
+    :config
+    (load-theme 'solarized-dark))
 
-;; (quelpa 'solarized-theme)
-;; (load-theme 'grandshell t)
+  ;; (quelpa 'solarized-theme)
+  ;; (load-theme 'grandshell t)
+  )
 
 (use-package pos-tip
   :quelpa (pos-tip
@@ -481,8 +483,8 @@ on a symbol. Pass symbol-name to the function DOC-FUNCTION."
   :init
   (setq vlf-application 'dont-ask)        ; just do it
   (setq vlf-batch-size 8192)              ; a bit more text per batch please
-  :config
-  (require 'vlf-integrate)                ; just do it for real
+  ;; :config
+  ;;(require 'vlf-integrate)                ; just do it for real
   )
 
 ;; yasnippet : snippets
