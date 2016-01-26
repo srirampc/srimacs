@@ -2,6 +2,9 @@
 #+Author: srirampc
 #+LATEX_EXPORT_ON_SAVE: nil
 
+*ONLY for Archival purpoes*
+*NO longer used for customization.*
+
 +Shamelessy Copied+ Heavily Inspired from [[https://github.com/steckerhalter/][steckerhalter]]. Uses code from
 [[https://github.com/overtone/emacs-live][emacs-live]], [[https://github.com/eschulte/emacs24-starter-kit][eschulte]], [[http://tuhdo.github.io/][tuhdo]] and many others.
 

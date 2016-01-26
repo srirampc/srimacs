@@ -37,3 +37,7 @@ The following are pre-requesites :
 5. R dependencies
    - R version 3 or above
 6. Replace .emacs with dot-emacs-OS.el and edit as required.
+
+## TODO
+
+1. Find a way to install auctex without throwing errors.
